@@ -1,0 +1,77 @@
+﻿一. MCC 模块简介：
+基于 PCIE 的多片级联通信模块，主要用于支持通过 PCIE 级联的芯片之间的数据（视频和图形）传输工作。该模块主要包含如下几个功能：
+	1. 支持主设备启动从设备；
+	2. 支持主设备和从设备之间数据传输（通过 PCIe 内部 DMA ）；
+	3. 支持主从片直接的命令收发；
+
+二．如何使用本模块实现主片启动从片？
+	1. 制作从片的镜像文件（u-boot.bin、kernel、cramfs.initrd.img）：
+	    1) 制作 u-boot.bin
+	        步骤1： 进入 u-boot 代码根目录下将芯片相关的配置文件 ~/include/configs/xxxx.h 中的宏设置为：
+	                #define CONFIG_BOOTCOMMAND "bootm 0x81000000 0x82000000"
+	                bootm 第一个参数是内核启动的起始地址，第二个参数是文件系统起始地址。
+	        步骤2： 进入 u-boot 源代码目录，执行如下命令编译裸的 u-boot.bin 镜像文件。
+	                # make ARCH=arm CROSS_COMPILE=arm-hisiv100nptl-linux- hi3535_config
+	                # make ARCH=arm CROSS_COMPILE=arm-hisiv100nptl-linux- 
+	        步骤3： 进入 ~/osdrv/tools/pc_tools/uboot_tools 目录，里面有一个包含 DDR 初始化信息的 xlsm 文件，打开它并切换到 main 页，点击按钮 Generate reg bin file 生成二进制文件 reg_info.bin。
+	        步骤4： 在同一目录下找到制作可运行的工具mkboot.sh(该工具会将DDR初始化脚本和编译后uboot目标文件合并到一起，形成一个最终可运行的u-boot镜像文件)，并将其复制到u-boot源代码顶级目录下。进入 u-boot 源代码根目录，执行如下命令：
+	                # ./mkboot.sh ../../tools/pc_tools/uboot_tools/reg_info.bin u-boot-ok.bin
+	                # mv u-boot-ok.bin u-boot.bin
+	                其中 u-boot 源码根目录下新生成的 u-boot.bin 就是我们需要的 u-boot 镜像文件。
+	
+	    2). 制作内核镜像 uImage
+	        可直接使用 osdrv 编译好的 uImage 内核镜像。
+	
+	    3．制作 cramfs.initrd.img 根文件系统镜像
+	　　    osdrv 编译完成后，在 osdrv/pub 下会有 rootfs 的压缩包 rootfs_uclibc.tgz（或者rootfs.glibc.tgz），将其解压后，将用户所需要的从片ko、应用程序及其它文件放到rootfs下，并通过rootfs下的mkimg.rootfs工具制作从片内存文件系统。mkimg.rootfs使用方法为：
+	        # ./mkimg.rootfs [文件系统源文件目录] [文件系统镜像目标文件目录] [文件系统镜像文件名]　[文件系统类型]
+	        例如：执行下面两条命令：
+	　　    # ./mkimg.rootfs . .. test cramfs-initrd
+	        # mv ../test.cramfs.initrd ../cramfs.initrd.img
+	        执行上面命令之后，在上一级目录下会生产一个cramfs.initrd.img的镜像文件。这个镜像文件就是我们需要的从片文件系统镜像文件。
+
+	2. 如何单独编译本模块？
+		本模块目前支持如下几种级联场景：1) hi3531(主片) 级联 hi3531(从片)；2) hi3531(主片) 级联 hi3532(从片)；3) hi3535(主片) 级联 hi3532(从片)；4) hi3535(主片) 级联 hi3535(从片)。
+		本模块支持一片主片级联多片相同的从片。
+		本模块在编译时，会根据链接到的内核源码判断具体的芯片型号，所以无需指定本侧的芯片型号。但是在编译主片的驱动时，需要指定远侧(从片)的芯片类型。编译的时候，可以通过编译参数 SLAVE_CHIP(SLAVE_CHIP=hi3535) 来指定。
+		在文件 hi35xx_dev/arch/config.h 中，宏 SHARED_MEM_IN_SLAVE 表示 PCIE MCC 消息通信的共享内存在从片分配。当主从片都是 Hi3535 时，建议打开这个宏，否则共享内存会在主片分配。共享内存的地址为 MMZ 管理的某个区域，具体的地址请在插入ko的时候，通过相关参数进行指定。具体请看如何后面插入ko的说明。
+	
+		由于 Hi3535 PCIE 逻辑版本的升级，驱动也有针对性的做了一些改进。当主从都是 Hi3535 时，驱动推荐用户采用PCIE INT中断、直接 CPU 操作来收发消息等来提高业务的实时性和性能。相关的控制，可以在编译本模块时，通过编译参数 VER 进行完成。编译 Hi3535(主片) 级联 Hi3535(从片)的驱动时，请参考如下命令：
+			编译主片：make CROSS_COMPILE=arm-hisiv100nptl-linux- PCIE_KERNEL_MAKE=../../kernel/linux-3.4.y VER=2 SOFT_DDRT=y
+			编译从片：make CROSS_COMPILE=arm-hisiv100nptl-linux- PCIE_KERNEL_MAKE=../../kernel/linux-3.4.y VER=2 target=slave
+			(请注意：编译主片时，请将参数 PCIE_KERNEL_MAKE 指定为 PCI 配置为 RC 的内核源码的路径；编译从片时，请教参数 PCIE_KERNEL_MAKE 指定为 PCI 配置为 EP 模式的内核源码路径，切忌不要弄错)。
+		如果主片和从片不全为 Hi3535 时，建议不要带参数 VER=2。
+		本驱动和 Hi3531、Hi3532 发布包中的 PCIE MCC 代码有些许不同，但与 Hi3531、Hi3532 发布包中的 PCIE MCC 兼容。用户可以在 Hi3535 上使用本驱动，在 Hi3532 上使用其原发布包上的 PCIE MCC 驱动，进行级联。
+
+	3. 如何使用本模块实现主片引导从片启动？
+	        主片启动从片，依赖于驱动模块 hi35xx_dev_host.ko 和 boot_device.ko，以及应用程序 booter.
+	        步骤1：准备好硬件环境，确保主从片同时上电； 
+	        步骤2：在主片起来后，在其文件系统下创建目录 “/hisi-pci”，并将从片使用的镜像文件(u-boot.bin，uImage，cramfs.initrd.img)拷贝到该目录下；如果从片的 DDR 需要软 training，还需要将本模块编译后生成的 ddr_training.bin 和 pc_jump.bin 两个文件拷贝到目录 “/hisi-pci” 下面。
+	        步骤3：插入相关的内核模块：
+	               # insmod hi35xx_dev_host.ko
+	               # insmod boot_device.ko
+	        步骤4：执行应用程序 booter，实现从启动：
+		
+	               # ./booter start_device
+	        步骤5：插入其它模块，以支持主从片直接的数据和命令传输：
+	               主片：
+	               # insmod pcit_dma_host.ko
+			当共享内存在主片分配时：
+	               # insmod mcc_drv_host.ko shm_phys_addr=[消息共享内存的基址] shm_size=[消息共享内存的大小]
+			当共享内存在从片分配时：
+		       # insmod mcc_drv_host.ko
+	               # insmod mcc_usrdev_host.ko
+	               从片：
+	               # insmod hi35xx_dev_slv.ko
+	               # insmod pcit_dma_slv.ko
+			当共享内存在主片分配时：
+		       # insmod mcc_drv_slv.ko
+			当共享内存在从片分配时：
+	               # insmod mcc_drv_slv.ko shm_phys_addr=[消息共享内存的基址] shm_size=[消息共享内存的大小]
+	               # insmod mcc_usrdev_slv.ko
+			(共享内存在从片时，每个从片共享内存大小至少为768K；共享内存在主片时，共享内存至少为 N * 768K；其中 N 为主片所接的从片数目)。
+
+四. 注意事项
+	1. 从侧 u-boot.bin 中已经设定了 bootcmd 为 "bootm 0x81000000 0x82000000"，即指定了主侧往从侧搬运uImage的目的地址必须从0x81000000开始，cramfs.initrd.img的起始地址必须从 0x82000000开始；写主从级联启动的应用程序，或者修改uboot bootcmd的时候，要注意两边必须对应。
+
+	2. 写主从级联启动的应用程序时，注意在启动某设备完毕后，请务必将bar1这个pcie窗口，复原映射到设备的系统控制寄存器域(目前为：0x20050000）。参见demo程序。

@@ -1,0 +1,432 @@
+// ==================== Config PLL ======================
+
+// config pll timeout
+setmem /w 0x20050014 = 0x0fff8000
+
+// config apll
+setmem /w 0x20030000 = 0x12000000
+setmem /w 0x20030004 = 0x010030fa
+
+// config soc clk
+setmem /w 0x20030030 = 0x0
+
+// waiting ...
+dump /w 0x0..0x200
+// read if 0x200300e8=0x3f, then all pll locked
+dump /w  0x200300e8
+
+// set workmode from slow to normal
+setmem /w 0x20050000 = 0x4
+// waiting ...
+dump /w 0x0..0x200
+// read if 0x20050000=0x4, then workmode switch success
+dump /w  0x20050000
+
+// wating, until clk becoming steady
+dump /w 0x0..0x200
+dump /w 0x0..0x200
+
+
+
+//============================================================================== 
+//   Project   :  Hi3535V100 
+//   DDR3 type :  2Gbit128M16 
+//   DDR3 Width:  32bit 
+//   Work Freq :  DDRC clk freq =  400 MHz, prd = 2.500000 ns
+//                DDR  clk freq =  800 MHz, prd = 1.250000 ns
+//                APB  clk freq =  200 MHz, prd = 5.000000 ns
+//============================================================================== 
+
+
+// DDRC request exit self_refresh.config ddrc_ctrl_sref...
+// [1]  sref_done=0x1
+// [0]  sref_req=0x0
+setmem /w 0x20111000 = 0x2
+
+//=======read ddrc_curr_func.insref 
+//=======in_sref = ddrc_curr_func[0] 
+//=======wait ddrc exit self-refresh 
+// waiting ...
+dump /w 0x0..0x200
+dump /w 0x20111294 
+
+// DDRC_CFG_WORKMODE.
+// [28]   wr_rcv_mode=0x1
+// [24]   exclu_en=0x1
+// [20]   reorder_en=0x0
+// [16]   dual_ch=0x0
+// [13]   hdr_mode=0x1
+// [12]   read_mode=0x0
+// [8]    wrap_en=0x0
+// [4]    apre_en=0x0
+// [3]    func_clkon=0x0
+// [2]    data_clkon=0x0
+// [1]    cmd_clkon=0x0
+// [0]    clk_ratio=0x1
+setmem /w 0x20111040 = 0x11002001
+
+// DDRC_CFG_SREF.
+// [15:12] sref_arefnum=0x8
+// [8]     clk_switch=0x1
+// [4]     sref_odis=0x0
+// [0]  sref_cc=0x0
+setmem /w 0x20111020 = 0x8100
+
+// DDRC_CFG_PD.
+// [16]   pd_ac=0x0
+// [12]   pd_cc=0x0
+// [11:4] pd_prd=0x0
+// [0]    pd_en=0x0
+setmem /w 0x20111028 = 0x0
+
+// DDRC_CFG_DDRMODE.
+// [21:20] rank=0x0
+// [16]    zqc_en=0x0
+// [12]    bc_en=0x0
+// [8]     brstlen=0x0
+// [5:4]   mem_width=0x2
+// [2:0]   dram_type=0x6
+setmem /w 0x20111050 = 0x26
+
+// DDRC_RNKCFG0~3.
+// [13:12] mem_map=0x0
+// [8]     mem_bank=0x1
+// [6:4]   mem_row=0x3
+// [2:0]   mem_col=0x2
+setmem /w 0x20111060 = 0x142
+
+// DDRC_CFG_TIMING0.
+// [31:28]  tmrd=0x4
+// [27:24]  trrd=0x6
+// [23:19]  trp=0x7
+// [18:14]  trcd=0x7
+// [13:8]   trc=0x16
+// [5:0]    tras=0x10
+setmem /w 0x20111080 = 0x4639d610
+
+// DDRC_CFG_TIMING1.
+// [31:24]  tsre=0x40
+// [23:20]  trtw=0x2
+// [19:16]  twl=0x8
+// [15:12]  tcl=0xb
+// [8:0]    trfc=0x41
+setmem /w 0x20111084 = 0x3f38b080
+
+// DDRC_CFG_TIMING2.
+// [31:28]  tcke=0x7
+// [27:24]  twtr=0x3
+// [17:12]  tfaw=0x11
+// [10:0]   taref=0x00
+setmem /w 0x20111088 = 0x44016000
+
+// DDRC_CFG_TIMING3.
+// [31:22]  tzq_prd=0x3ff
+// [21:12]  tzqinit=0x1ff
+// [11:8]   taond=0x7
+// [7:4]    txard=0xf
+// [3:0]    trtp=0x3
+setmem /w 0x2011108c = 0xffd1f784
+
+// DDRC_CFG_TIMING4.
+// [24:20] tmod=0x6
+// [19:16] twlo=0xf
+// [13:8]  twldqsen=0x20
+// [5:0]   twlmrd=0x0
+setmem /w 0x20111090 = 0x820f18
+
+// DDRC_CFG_TIMING5.
+// [30:28] todt_ext=0x0
+// [26:24] tdqsckmax=0x0
+// [22:20] tdqsck=0x0
+// [19:16] trnk2rnk=0x1
+// [15:8]  tzqcs=0x40
+// [4:0]   twr=0x6
+setmem /w 0x20111094 = 0x2707
+
+// DDRC_CFG_DDRPHY.
+// [12]   phy_upden=0x1
+// [11:8] trdlat=0x5
+// [4]    phy_zqen=0x0
+// [0]    rcv_pdr=0x0
+setmem /w 0x20111200 = 0x1500
+
+// DDRC_CFG_ODT.
+// [31:28]  rodt3=0x0
+// [27:24]  rodt2=0x0
+// [23:20]  rodt1=0x0
+// [19:16]  rodt0=0x0
+// [15:12]  wodt3=0x0
+// [11:8]   wodt2=0x0
+// [7:4]    wodt1=0x0
+// [3:0]    wodt0=0x1
+setmem /w 0x201110c0 = 0x1
+
+//DDRC_CFG_DMCLVL
+// [4:0]    que_level=0xc
+setmem /w 0x201110c4 = 0xc
+
+// DDRC_CTRL_DDRRST.
+// [0] ddr3_rst_n = 0x1
+setmem /w 0x20111008 = 0x1
+//=======DDRC config finish====== 
+
+//=======PHY  congig start ====== 
+// PACK_PHYTMR0.
+// pack_t_dram_rst_low  = 0xff
+setmem /w 0x20118010 = 0xff
+
+// PACK_PHYTMR1.
+// pack_t_dram_cke_high = 0x80
+// pack_t_dram_cke_low  = 0xffff
+setmem /w 0x20118014 = 0x80ffff
+
+// PACK_PLLTMR.
+// pack_t_pll_lock = 0x8000
+// pack_t_pll_rst  = 0x80
+setmem /w 0x2011801c = 0x80000080
+
+// PACK_DLYMEASCTRL.
+// pack_dynamic_dqsen = 0x0
+// pack_dynamic_dqsgth= 0x0
+setmem /w 0x20118020 = 0x445
+
+// PACK_DRAMCFG.
+// [31:28]  pack_ma2t=0x1 ==== 2T timing config===
+// [31:28]  pack_dcfg_type=0x2
+setmem /w 0x2011802c = 0x22
+
+// ==== PACK_ACPHYCTL4 only config when clk_ratio=1'b1,2T timing config ===.
+// [31:28]  pack_timing2t_addr=0xffff
+// [31:28]  pack_timing2t_ba=0x7
+// [31:28]  pack_timing2t_we=0x1
+// [31:28]  pack_timing2t_cas=0x1
+// [31:28]  pack_timing2t_ras=0x1
+setmem /w 0x20118180 = 0xffff0770
+
+// PACK_DRAMTMR0.
+// pack_trc  = 0x28
+// pack_trrd = 0x6
+// pack_tras = 0x1c
+// pack_trcd = 0xc
+// pack_trp  = 0xc
+// pack_twtr = 0x6
+// pack_trtp = 0x6
+setmem /w 0x20118030 = 0xb328ee88
+
+// PACK_DRAMTMR1.
+// pack_trtw = 0x5
+// pack_trfc = 0x80
+// pack_tfaw = 0x20
+// pack_tmod = 0xc
+// pack_tmrd = 0x4
+setmem /w 0x20118034 = 0x0d005908
+
+// PACK_DRAMTMR2.
+// pack_tccd  = 0x0
+// pack_tdllk = 0x200
+// pack_tcke  = 0xe
+// pack_txp   = 0x6
+// pack_txs   = 0x60
+setmem /w 0x20118038 = 0x24084110
+
+// PACK_DRAMTMR3.
+// pack_twr    = 0xc
+// pack_twl    = 0x8
+// pack_tinit5 = 0x3103
+// pack_tzcal  = 0x200
+setmem /w 0x2011803c = 0xe8100240
+
+// PACK_DRAMTMR4.
+// pack_todton = 0x0
+// pack_todt   = 0x6
+// pack_twlo   = 0x7
+// pack_twlmrd = 0x64
+setmem /w 0x20118040 = 0x6430
+
+// PACK_ODTCR.
+// pack_wodt_rank0 = 0x1
+setmem /w 0x20118044 = 0x1
+
+// PACK_MISC.
+// pack_addr_delay =0x0
+// pack_cfg_rl =0x9
+// pack_cfg_wl =0x7
+setmem /w 0x20118070 = 0x487
+
+// PACK_DRAM_MR01.
+// pack_mr0 = 0x1f70
+// pack_mr1 = 0x6
+setmem /w 0x20118064 = 0x61f70
+
+// PACK_DRAM_MR23.
+// pack_mr2 = 0x18
+// pack_mr3 = 0x0
+setmem /w 0x20118068 = 0x18
+
+// IOCTL
+setmem /w 0x20118088 = 0x4bcbf841
+
+//DXPHYRSV
+setmem /w 0x20118270 = 0xff003f00
+setmem /w 0x20118370 = 0xff003f00
+setmem /w 0x201182f0 = 0xff00ff80
+setmem /w 0x201183f0 = 0xff00ff80
+
+// PACK_PLLCTRL.
+// [1]:pack_pll_pwdn = 0x1: pll power down
+setmem /w 0x20118018 = 0x2
+
+//wait 1us
+dump /w 0x0..0x2000
+
+// PACK_PLLCTRL.
+// [1]:pack_pll_pwdn = 0x0: pll power up
+setmem /w 0x20118018 = 0x0
+
+//wait 1us
+dump /w 0x0..0x2000
+
+//======================config dsq=====================
+setmem /w 0x20118168 = 0x0       
+setmem /w 0x2011818c = 0x014001c0
+setmem /w 0x2011824c = 0x0       
+setmem /w 0x2011823c = 0x2800    
+setmem /w 0x201182bc = 0x2800    
+setmem /w 0x2011833c = 0x2800    
+setmem /w 0x201183bc = 0x2800    
+setmem /w 0x20118248 = 0x2       
+setmem /w 0x201182c8 = 0x2       
+setmem /w 0x20118348 = 0x2       
+setmem /w 0x201183c8 = 0x2     
+  
+setmem /w 0x20118090 = 0x00780078
+dump /w 0x0..0x2000
+                       
+setmem /w 0x20118090 = 0x00700070
+dump /w 0x0..0x2000
+
+setmem /w 0x20118120 = 0x9       
+setmem /w 0x201181a0 = 0x4       
+setmem /w 0x20118128 = 0x9       
+setmem /w 0x201181a8 = 0x5       
+setmem /w 0x20118130 = 0x13      
+setmem /w 0x20118134 = 0x0       
+setmem /w 0x20118138 = 0x000d0000
+setmem /w 0x2011813c = 0x000a000d
+setmem /w 0x20118140 = 0x0011000d
+setmem /w 0x20118144 = 0x0008000b
+setmem /w 0x20118148 = 0x00090012
+setmem /w 0x2011814c = 0x00080012
+setmem /w 0x20118150 = 0x000c0012
+setmem /w 0x20118154 = 0x000f000c
+setmem /w 0x20118158 = 0x000d0012
+setmem /w 0x2011815c = 0x000d000f
+setmem /w 0x20118160 = 0x00120004
+setmem /w 0x20118164 = 0x00000006
+setmem /w 0x20118210 = 0x0f0b0c0b
+setmem /w 0x20118214 = 0x0f0e0b0d
+setmem /w 0x20118218 = 0x0d      
+setmem /w 0x20118290 = 0x0e0f0c0c
+setmem /w 0x20118294 = 0x0c0f0b0d
+setmem /w 0x20118298 = 0x0c      
+setmem /w 0x20118310 = 0x0e0c0b0c
+setmem /w 0x20118314 = 0x0d0f0a0e
+setmem /w 0x20118318 = 0x0d      
+setmem /w 0x20118390 = 0x0f0f0f0a
+setmem /w 0x20118394 = 0x0d0f0e0d
+setmem /w 0x20118398 = 0x0c      
+setmem /w 0x20118230 = 0x00000a02
+setmem /w 0x201182b0 = 0x00000a02
+setmem /w 0x20118330 = 0x00000b02
+setmem /w 0x201183b0 = 0x00000a02
+setmem /w 0x20118258 = 0x2       
+setmem /w 0x201182d8 = 0x2       
+setmem /w 0x20118358 = 0x2       
+setmem /w 0x201183d8 = 0x2       
+setmem /w 0x2011821c = 0x0f0b0c0b
+setmem /w 0x20118220 = 0x0f0e0b0d
+setmem /w 0x20118224 = 0x0       
+setmem /w 0x2011829c = 0x0e0f0c0c
+setmem /w 0x201182a0 = 0x0c0f0b0d
+setmem /w 0x201182a4 = 0x0       
+setmem /w 0x2011831c = 0x0e0c0b0c
+setmem /w 0x20118320 = 0x0d0f0a0e
+setmem /w 0x20118324 = 0x0       
+setmem /w 0x2011839c = 0x0f0f0f0a
+setmem /w 0x201183a0 = 0x0d0f0e0d
+setmem /w 0x201183a4 = 0x0       
+setmem /w 0x2011822c = 0x0000001a
+setmem /w 0x201182ac = 0x0000001a
+setmem /w 0x2011832c = 0x0000001a
+setmem /w 0x201183ac = 0x0000001a
+setmem /w 0x20118234 = 0x1200    
+setmem /w 0x201182b4 = 0x1200    
+setmem /w 0x20118334 = 0x1300    
+setmem /w 0x201183b4 = 0x1200    
+setmem /w 0x20118004 = 0x140b    
+   
+dump /w 0x0..0x200
+// read if 0x20118004=0x0, then workmode switch success
+dump /w  0x20118004
+
+dump /w 0x0..0x200
+// read if 0x20118008=0x0, then workmode switch success
+dump /w  0x20118008
+          
+                 
+//======================DDRC config start=====================
+// DDRC request enter self_refresh.config ddrc_ctrl_sref...
+// [1]  sref_done=0x0
+// [0]  sref_req=0x1
+setmem /w 0x20111000 = 0x1
+
+// DDRC_CFG_PD.enbale power down
+// [16]   pd_ac=0x0
+// [12]   pd_cc=0x0
+// [11:4] pd_prd=0x40
+// [0]    pd_en=0x1
+setmem /w 0x20111028 = 0x401
+
+// DDRC_CFG_TIMING2. config taref,enable auto-refresh
+// [31:28]  tcke=0x7
+// [27:24]  twtr=0x3
+// [17:12]  tfaw=0x11
+// [10:0]   taref=0x0be
+setmem /w 0x20111088 = 0x440160c0
+
+// DDRC request exit self_refresh.config ddrc_ctrl_sref...
+// [1]  sref_done=0x1
+// [0]  sref_req=0x0
+setmem /w 0x20111000 = 0x2
+
+//=======read ddrc_curr_func.insref 
+//=======in_sref = ddrc_curr_func[0] 
+//=======wait ddrc exit self-refresh 
+
+// waiting ...
+dump /w 0x0..0x200
+dump /w 0x20111294 
+
+//=== SFC send precharge all command===
+// [2:0]  cmd_type=0x6
+//setmem /w 0x20111210 = 0x16
+
+// [0]  sref_req=0x0
+//setmem /w 0x2011100c = 0x1
+
+//clear count
+//setmem /w 0x20118004 = 0x00008000
+//setmem /w 0x20118004 = 0x0
+
+//ddrt
+//DDRT TEST
+//setmem /w 0x206d0010 = 0x1fffff   
+//setmem /w 0x206d0014 = 0xffffffff 
+//setmem /w 0x206d0018 = 0x10       
+//setmem /w 0x206d001c = 0x80000000
+//setmem /w 0x206d0020 = 0x80000000
+//setmem /w 0x206d000c = 0x1132 
+//dump /w 0x0..0x1000 
+//setmem /w 0x206d0000 = 0x11      
+
+// Finish!!

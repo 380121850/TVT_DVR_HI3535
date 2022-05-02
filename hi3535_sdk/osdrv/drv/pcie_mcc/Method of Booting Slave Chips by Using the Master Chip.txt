@@ -1,0 +1,79 @@
+﻿1.Introduction to the MCC Module
+The PCIe-based multi-chip communication (MCC) module is used for data transmission between chips cascaded over the PCIe. The MCC module has the following features
+	1.Allows the master chip to boot slave chips.
+	2.Supports data transmission between master and slave chips.
+	3.Transmits or receives commands between master and slave chip. 
+2 Enabling the Master Chip to Boot Slave Chips
+  2.1 Creating Images (u-boot, uImage, and cramfs.initrd.img) for Slave Chips
+      To create u-boot.bin, perform the following steps
+      Step 1	In the root directory of the U-boot source code, set the macro CONFIG_BOOTCOMMAND in ~includeconfigsgodcube.h to bootm 0x81000000 0x82000000.
+      Step 2	In the root directory of the U-boot source code, run the following commands to create a raw u-boot.bin.
+                # make ARCH=arm CROSS_COMPILE=arm-hisiv100nptl-linux- hi3535_config
+                # make ARCH=arm CROSS_COMPILE=arm-hisiv100nptl-linux-
+      Step 3	In ~osdrvtoolspc_toolsuboot_tools, copy mkboot.sh to the root directory of the U-boot source code, open the xlsm file, click the Main sheet, and then click the Generate reg bin file button to generate a binary file (reg_info.bin) with DDR initialization information.
+      Step 4	In the root directory of the U-boot source code, run the following commands to generate the final u-boot.bin image:
+                # .mkboot.sh ....toolspc_toolsuboot_toolsreg_info.bin u-boot-ok.bin
+                # mv u-boot-ok.bin u-boot.bin
+                The u-boot.bin file under the root directory of the U-boot source code is the required image.
+                ----End
+       The kernel image uImage released in the SDK is available for slave chips.
+       To create the root file system image cramfs.initrd.img, perform the following steps:
+      Step 1	Decompress the compressed file rootfs_uclibc.tgz or rootfs_glibc.tgz that is generated in osdrvpub after osdrv is compiled. 
+      Step 2	Copy all the applications and required kernel drivers to the generated root file system folder, and run the following commands in the root file system folder to create cramfs.initrd.img (read-only file system)
+                # .mkimg.rootfs . .. test cramfs-initrd
+                # mv ..test.cramfs.initrd ..cramfs.initrd.img
+                The file cramfs.initrd.img is generated in osdrvpub.
+                ----End
+  2.2 Separately Compiling the MCC Module
+      The MCC module supports the following cascade scenarios:
+    A Hi3531 (master chip) is cascaded with another Hi3531 (slave chip).
+    A Hi3531 (master chip) is cascaded with a Hi3532 (slave chip).
+    A Hi3535 (master chip) is cascaded with a Hi3532 (slave chip).
+    A Hi3535 (master chip) is cascaded with another Hi3535 (slave chip).
+      The MCC module allows a master chip to be cascaded with multiple slave chips of the same model.
+      When the MCC module is compiled, the chip model is checked based on the linked kernel source code; therefore, the chip model at the current side does not need to be specified. However, when the MCC module of the master chip is compiled, the chip model of the remote side (slave chip) needs to be specified, which is implemented by setting the parameter SLAVE_CHIP (such as SLAVE_CHIP=hi3535).
+      In the config.h file in hi35xx_dev/arch, the macro SHARED_MEM_IN_SLAVE indicates that the shared memory for the PCIe MCC message communication is allocated from the memory of the slave chip. When both the master and slave chips are the Hi3535, you are advised to enable SHARED_MEM_IN_SLAVE; otherwise, the shared memory is allocated from the memory of the master chip. The address for the shared memory is located in a region managed by the media memory zone (MMZ). You need to specify the address when loading .ko drivers by using related parameters. For details about how to load .ko drivers, see section 1.2.3.
+      The MCC module is updated when the Hi3535 PCIe logic is upgraded. When both the master and slave chips are the Hi3535, you are advised to receive or send messages by using the PCIe INT interrupts and operating the CPU, which ensures the real-time requirements of services and performance. The related control can be implemented by compiling the VER parameter when the MCC module is compiled. When a Hi3535 (master chip) is cascaded with another Hi3535 (slave chip), run the following commands to compile their MCC modules:
+    Command for compiling the MCC module of the master chip
+        make CROSS_COMPILE=arm-hisiv100nptl-linux- PCIE_KERNEL_MAKE=../../kernel/linux-3.4.y VER=2 SOFT_DDRT=y
+
+      Command for compiling the MCC module of the slave chip
+      make CROSS_COMPILE=arm-hisiv100nptl-linux- PCIE_KERNEL_MAKE=../../kernel/linux-3.4.y VER=2 target=slave
+NOTE:
+When compiling the MCC module of the master chip, set PCIE_KERNEL_MAKE to path of the kernel source code (PCI mode = RC mode); when compiling the MCC module of the slave chip, set PCIE_KERNEL_MAKE to path of the kernel source code (PCI mode = EP mode).
+If only one of the master and slave chips is the Hi3535, you are advised to delete the parameter VER=2.
+The MCC module is different from but compatible with the PCIe MCC code in the Hi3531 and Hi3532 release packages. When a Hi3535 is cascaded with a Hi3532, you can use the MCC module in the Hi3535 release package for the Hi3535 and use the PCIe MCC driver in the Hi3532 release package for the Hi3532.
+   2.3 Using the MCC Module to Enable the Master Chip to Boot Slave Chips
+       The drivers hi35xx_dev_host.ko and boot_device.ko and the application booter are required for enabling the master chip to boot slave chips.
+Perform the following steps:
+       Step 1	Prepare the hardware environment to ensure that master and slave chips are powered on at the same time.
+       Step 2	After the master chip is powered on, create the hisi-pci directory in the file system of the master chip, and copy all images (u-boot.bin, uImage, and cramfs.initrd.img) required by slave chips to hisi-pci. If soft training is required for the DDRs of slave chips, copy the ddr_training.bin and pc_jump.bin files generated when the MCC module is compiled to hisi-pci.
+       Step 3	Load kernel drivers by running the following commands
+                # insmod hi35xx_dev_host.ko
+                # insmod boot_device.ko
+       Step 4	Run booter to boot slave chips.
+                # .booter start_device
+                All slave chips are booted.
+       Step 5	Load other drivers to support DMA data and command transmission
+                For the master chip:
+                # insmod pcit_dma_host.ko
+                When the shared memory is allocated from the memory of the master chip:
+                # insmod mcc_drv_host.ko shm_phys_addr=[shared_memory_base] shm_size=[shared_memory_size]
+                When the shared memory is allocated from the memory of the slave chip:
+                # insmod mcc_drv_host.ko
+                # insmod mcc_usrdev_host.ko
+                For the slave chip:
+                # insmod hi35xx_dev_slv.ko
+                # insmod pcit_dma_slv.ko
+                When the shared memory is allocated from the memory of the master chip:
+                # insmod mcc_drv_slv.ko
+                When the shared memory is allocated from the memory of the slave chip:
+                # insmod mcc_drv_slv.ko shm_phys_addr=[Base address for the shared memory] shm_size=[Size of the shared memory]
+                # insmod mcc_usrdev_slv.ko
+NOTE:
+If multiple slave chips are cascaded with the master chip, shared_memory_size must be greater than or equal to the sum of shared memory size required by each slave chip (768 KB for each slave chip).
+      ---End
+3 Notes
+  Note the following:
+  On the slave chip side, bootcmd is set to bootm 0x81000000 0x82000000 in u-boot.bin, that is, the destination start address for transferring uImage from the master chip to the slave chip is set to 0x81000000 and the start address for cramfs.initrd.img is set to 0x82000000. Ensure that the configured addresses are consistent with the transfer addresses when the application for starting cascade is written or uboot bootcmd is modified.
+  When the application for starting cascade is written, switch the mapping address for the PCIe window bar1 to the system control register domain (0x20050000) of the device after the device is started. For details, see the demo program.

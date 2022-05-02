@@ -1,0 +1,55 @@
+﻿1. Greneral introduction for this module:
+The PCIE-based Multi-Chips-Communication(MCC) module is used for data transmission between chips connected with PCIE. This module supports functions as follows:
+	1). Host boots slave devices;
+	2). Data transmission between host and slave;
+	3). Command sending or receiving for different application purposes. 
+
+2. How does host boot slave devices?
+	1). How to create image files(u-boot, uImage, cramfs.initrd.img) for slave devices?
+	* u-boot.bin: 
+	    step 1: Make sure macro CONFIG_BOOTCOMMAND in file ~/include/configs/godcube.h under top directory of u-boot source is set as "bootm 0x81000000 0x82000000";
+	    step 2: Enter u-boot source directory and run the following commands to create a raw u-boot.bin;
+	            # make ARCH=arm CROSS_COMPILE=arm-hisiv100nptl-linux- xxxx.h
+	            # make ARCH=arm CROSS_COMPILE=arm-hisiv100nptl-linux-
+	            (Noted: xxxx.h represents the right configuration file for a specific chip.)
+	    step 3: A file named mkboot.sh and a xlsm file are found under directory ../../tools/pc_tools/uboot_tools (osdrv/tools/pc_tools/uboot_tools).Copy file mkboot.sh to u-boot source folder. Open the xlsm file, and switch to sheet main, click button "Generate reg bin file" to generate a binary file with ddr initialization information(reg_info.bin).
+	    step 4: Enter u-boot source directory and run the following commands to generate the final u-boot.bin image.
+	            # ./mkboot.sh ../../tools/pc_tools/uboot_tools/reg_info.bin u-boot-ok.bin
+	            # mv u-boot-ok.bin u-boot.bin
+	    File u-boot.bin under u-boot source directory is the right u-boot.bin image.
+
+	* uImage:
+	    The uImage released is available for slave.
+
+	* cramfs.initrd.img:
+	    After osdrv is compiled, a compressed file rootfs_uclibc.tgz or rootfs_glibc.tgz will be found in osdrv/pub/. decompress it and copy all the applications or kernel modules needed to it, enter the folder decompressed and run the following commands to create cramfs.initrd.img(read only file system):
+	    # ./mkimg.rootfs . .. test cramfs-initrd
+	    # mv ../test.cramfs.initrd ../cramfs.initrd.img
+	    file cramfs.initrd.img will be found in osdrv/pub/.
+
+	2). How to use this module to boot slave devices?
+	To support host boot slave devices, two kernel modules(hi35xx_dev_host.ko and boot_device.ko) and an application(booter) are needed.
+	    step 1: Make sure the hardware environment is prepared, make sure that host and slave power on at the same time.
+	    step 2: Create directory /hisi-pci/ in host side, and copy all images(u-boot.bin, uImage and cramfs.initrd.img) for slave to it.
+	    step 3: Insert Kernel modules:
+	            # insmod hi35xx_dev_host.ko
+	            # insmod boot_device.ko
+	    step 4: run booter to start slave devices:
+	            # ./booter start_device
+	            then all slave devices will be started.
+	    step 5: Insert other modules to support DMA data transmission and command:
+	            For host side:
+	            # insmod pcit_dma_host.ko
+	            # insmod mcc_drv_host.ko shm_phys_addr=[shared_memory_base] shm_size=[shared_memory_size]
+	            # insmod mcc_usrdev_host.ko
+	            (Noted: If there are more than one slave device connected to host, the shared_memory_size must be equal or greater than the sum of shared memory size required for each slave device(768Kbytes for each slave).
+	            For slave side:
+	            # insmod hi35xx_dev_slv.ko
+	            # insmod pcit_dma_slv.ko
+	            # insmod mcc_drv_slv.ko
+	            # insmod mcc_usrdev_slv.ko
+
+3. Matters need attention.
+	Omitted.
+
+
