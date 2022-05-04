@@ -11,6 +11,8 @@ export UBOOT_IMAGE_BIN
 export ARCH=arm
 export CROSS_COMPILE=$(OSDRV_CROSS)-
 
+export OSDRV_DIR_MODIFY=$(OSDRV_DIR)/../../modify/osdrv/
+
 # if CHIP is support, we set SUPPORT_CHIP = "yes"
 SUPPORT_CHIP := "no"
 
@@ -132,16 +134,18 @@ hiboot_clean:
 ##########################################################################################
 hikernel:
 	@echo "---------task [2] build kernel"
-	rm $(OSDRV_DIR)/kernel/linux-3.4.y -rf
-	tar xzf $(OSDRV_DIR)/kernel/linux-3.4.y.tgz -C $(OSDRV_DIR)/kernel/
+	#rm $(OSDRV_DIR)/kernel/linux-3.4.y -rf
+	#tar xzf $(OSDRV_DIR)/kernel/linux-3.4.y.tgz -C $(OSDRV_DIR)/kernel/
 	find $(OSDRV_DIR)/kernel/linux-3.4.y | xargs touch
+	cp $(OSDRV_DIR_MODIFY)/kernel/linux-3.4.y/arch/arm/configs/$(CHIP_KERNEL_CFG) $(OSDRV_DIR)/kernel/linux-3.4.y/arch/arm/configs/$(CHIP_KERNEL_CFG)
 	make -C $(OSDRV_DIR)/kernel/linux-3.4.y ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- $(CHIP_KERNEL_CFG)
 	pushd $(OSDRV_DIR)/kernel/linux-3.4.y;make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- -j 20 >/dev/null;popd
 	pushd $(OSDRV_DIR)/kernel/linux-3.4.y;make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- uImage -j 20 >/dev/null;popd
 	cp $(OSDRV_DIR)/kernel/linux-3.4.y/arch/arm/boot/uImage $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(KERNEL_IMAGE_BIN)
 
 hikernel_clean:
-	rm $(OSDRV_DIR)/kernel/linux-3.4.y -rf
+	#rm $(OSDRV_DIR)/kernel/linux-3.4.y -rf
+	pushd $(OSDRV_DIR)/kernel/linux-3.4.y;make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- distclean >/dev/null;popd
 
 ##########################################################################################
 #task [3]	prepare drv
@@ -206,7 +210,7 @@ hibusybox:
 	tar xzf $(OSDRV_DIR)/busybox/busybox-1.16.1.tgz -C $(OSDRV_DIR)/busybox
 	find $(OSDRV_DIR)/busybox/busybox-1.16.1 | xargs touch
 	cp $(OSDRV_DIR)/busybox/busybox-1.16.1/$(BUSYBOX_CFG) $(OSDRV_DIR)/busybox/busybox-1.16.1/.config
-	cp $(OSDRV_DIR)/../../modify/busybox/busybox-1.16.1/Makefile $(OSDRV_DIR)/busybox/busybox-1.16.1/
+	cp $(OSDRV_DIR_MODIFY)/busybox/busybox-1.16.1/Makefile $(OSDRV_DIR)/busybox/busybox-1.16.1/
 	pushd $(OSDRV_DIR)/busybox/busybox-1.16.1/;make -j 20 >/dev/null;popd
 	make -C $(OSDRV_DIR)/busybox/busybox-1.16.1 install
 	cp -af $(OSDRV_DIR)/busybox/busybox-1.16.1/_install/* $(OSDRV_DIR)/pub/$(PUB_ROOTFS)
