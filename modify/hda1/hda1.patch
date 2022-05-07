@@ -1,0 +1,234 @@
+File hda1_src/dev/console is a character special file while file hda1_modify/dev/console is a character special file
+File hda1_src/dev/net/tun is a character special file while file hda1_modify/dev/net/tun is a character special file
+diff -uNr --no-dereference hda1_src/etc.defaults/passwd hda1_modify/etc.defaults/passwd
+--- hda1_src/etc.defaults/passwd	2022-05-06 12:14:50.266008777 +0000
++++ hda1_modify/etc.defaults/passwd	2022-05-06 12:13:54.778017106 +0000
+@@ -1,4 +1,4 @@
+-root:x:0:0::/root:/bin/ash
++root::0:0::/root:/bin/ash
+ system:x:1:1::/usr/syno/synoman:/usr/bin/nologin
+ daemon:x:2:2::/:/bin/sh
+ lp:x:7:7::/var/spool/lpd:/bin/sh
+@@ -16,5 +16,5 @@
+ dovecot:x:143:143::/dev/null:/usr/bin/nologin
+ ldap:x:439:439::/var/lib/openldap:/usr/bin/nologin
+ http:x:1023:1023::/var/services/web:/bin/false
+-admin:x:1024:100:System default user:/var/services/homes/admin:/bin/sh
++admin::1024:100:System default user:/var/services/homes/admin:/bin/sh
+ guest:x:1025:100:Guest:/nonexist:/usr/bin/nologin
+diff -uNr --no-dereference hda1_src/etc.defaults/rc hda1_modify/etc.defaults/rc
+--- hda1_src/etc.defaults/rc	2022-05-06 12:14:51.045008659 +0000
++++ hda1_modify/etc.defaults/rc	2022-05-07 13:20:31.336210784 +0000
+@@ -7,6 +7,7 @@
+ 	. /etc.defaults/rc.clkcfg_hi3535 > /dev/null || echo "[SYNO] fail to run rc.clkcfg_hi3535" > /dev/kmsg
+ 	. /etc.defaults/rc.sysctl_hi3535 > /dev/null || echo "[SYNO] fail to run rc.sysctl_hi3535" > /dev/kmsg
+ 	. /etc.defaults/rc.pinctrl_hi3535_aic31 > /dev/null || echo "[SYNO] fail to run rc.pinctrl_hi3535_aic31" > /dev/kmsg
++	#./etc.defaults/sysctl_asic.sh > /dev/null || echo "[SYNO] fail to run sysctl_asic.sh" > /dev/kmsg
+ 
+     if [ -f "/.nvr_lang_sel" ]; then
+         LANG_SEL=`cat "/.nvr_lang_sel"`
+diff -uNr --no-dereference hda1_src/etc.defaults/rc.network hda1_modify/etc.defaults/rc.network
+--- hda1_src/etc.defaults/rc.network	2022-05-06 12:14:50.309008770 +0000
++++ hda1_modify/etc.defaults/rc.network	2022-05-07 13:24:49.281750780 +0000
+@@ -1224,6 +1224,9 @@
+ 		# so when the string part eth was removed, only the numerical part will be left
+ 		return;
+ 	fi
++	echo "default hardware mac"
++	return;
++	
+ 	macIndex=`expr ${macIndex} + 1`
+ 	if [ "${specific_mac}" != "" ]; then
+ 		macIndex=${specific_mac}
+diff -uNr --no-dereference hda1_src/etc.defaults/synoinfo.conf hda1_modify/etc.defaults/synoinfo.conf
+--- hda1_src/etc.defaults/synoinfo.conf	2022-05-06 12:14:51.251008628 +0000
++++ hda1_modify/etc.defaults/synoinfo.conf	2022-05-06 12:13:54.013017221 +0000
+@@ -30,22 +30,22 @@
+ support_fw_security="yes"
+ support_directory_service="yes"
+ support_power_schedule="yes"
+-support_buzzer="yes"
++support_buzzer="no"
+ support_poweroff="yes"
+ supporttrustdomain="yes"
+ support_ipsec="yes"
+ supportMFP="yes"
+-support_synoacl="yes"
++support_synoacl="no"
+ support_wireless_number="2"
+ supportrcpower="yes"
+ supportext4="yes"
+ supporthfsplus="yes"
+ support_wimax="yes"
+-showdisktemperature="yes"
++showdisktemperature="no"
+ support_mtd_serial="yes"
+ support_auto_poweron="yes"
+ support_synopkg="yes"
+-supportsmart="yes"
++supportsmart="no"
+ supportntfswrite="yes"
+ support_share_encryption="yes"
+ mfp_manualtimer="300"
+@@ -91,7 +91,7 @@
+ auto_poweroff_timer="0"
+ enableguest="no"
+ usbbkp="yes"
+-usbcopy="no"
++usbcopy="yes"
+ netbkp="no"
+ supportmediaservice="yes"
+ runmediaservice="no"
+@@ -224,7 +224,7 @@
+ enable_fan_debug="0x0"
+ 
+ # Add key for support fan model
+-support_fan="yes"
++support_fan="no"
+ 
+ # Disk options
+ BS_Thr_Enable="yes"
+@@ -247,14 +247,14 @@
+ sdcopy="no"
+ disable_join_cms_host="yes"
+ supportraidcross="yes"
+-disable_exfat="yes"
+-supportsystemperature="yes"
++disable_exfat="no"
++supportsystemperature="no"
+ support_syno_hybrid_raid="yes"
+ maxservices="256"
+-support_fan_adjust_dual_mode="yes"
++support_fan_adjust_dual_mode="no"
+ satadeepsleeptimer="1"
+ is_business_model="no"
+-esataportcfg="0x4"
++esataportcfg="0x0"
+ synobios="nvr216"
+ sata_deep_sleep_en="yes"
+ buzzeroffen="0x9f"
+diff -uNr --no-dereference hda1_src/etc.defaults/sysctl_asic.sh hda1_modify/etc.defaults/sysctl_asic.sh
+--- hda1_src/etc.defaults/sysctl_asic.sh	1970-01-01 00:00:00.000000000 +0000
++++ hda1_modify/etc.defaults/sysctl_asic.sh	2022-05-06 12:13:54.222017190 +0000
+@@ -0,0 +1,64 @@
++#!/bin/sh
++
++#Andy
++#sata control
++himm 0x200f0084 0x1
++himm 0x201f0400 0x50
++himm 0x201f0100 0x40
++
++#USB3.0 control
++#himm 0x200f00EC 0x0
++#himm 0x200f00F0 0x0
++#himm 0x201A0400 0x30
++#himm 0x201A00C0 0x10
++himm 0x200f00EC 0x1
++himm 0x200f00F0 0x1
++himm 0x20120084 0x00040fc0
++
++#linux net
++himm 0x12020014 0x5
++himm 0x12020010 0x1743
++himm 0x12020014 0x100
++himm 0x12020010 0x1783
++
++#HDMI
++himm 0x200F00F4 0x1
++himm 0x200F00F8 0x1
++himm 0x200F00FC 0x1
++himm 0x200F0100 0x1
++
++#sata
++himm 0x12010148 0x376eb8;
++himm 0x1201014c 0x0a280;
++himm 0x12010174 0x6f180000;
++himm 0x12010174 0x6f390000;
++himm 0x12010174 0x6f5a0000;
++himm 0x12010174 0x6f390000;
++himm 0x12010174 0x6f180000;
++himm 0x12010174 0x6f390000;
++himm 0x12010174 0x6f5a0000;
++
++himm 0x120101c8 0x376eb8;
++himm 0x120101cc 0x0a280;
++himm 0x120101f4 0x6f180000;
++himm 0x120101f4 0x6f390000;
++himm 0x120101f4 0x6f5a0000;
++himm 0x120101f4 0x6f390000;
++himm 0x120101f4 0x6f180000;
++himm 0x120101f4 0x6f390000;
++himm 0x120101f4 0x6f5a0000;
++
++himm 0x12010248 0x376eb8;
++himm 0x1201024c 0x0a280;
++himm 0x12010274 0x6f180000;
++himm 0x12010274 0x6f390000;
++himm 0x12010274 0x6f5a0000;
++himm 0x12010274 0x6f390000;
++himm 0x12010274 0x6f180000;
++himm 0x12010274 0x6f390000;
++himm 0x12010274 0x6f5a0000;
++
++himm 0x12010174 0x0E390000;
++himm 0x120101f4 0x0E390000;
++himm 0x12010274 0x0E390000;
++
+diff -uNr --no-dereference hda1_src/usr/syno/etc.defaults/hi3535ModuleInstall.sh hda1_modify/usr/syno/etc.defaults/hi3535ModuleInstall.sh
+--- hda1_src/usr/syno/etc.defaults/hi3535ModuleInstall.sh	2022-05-06 12:15:09.889005819 +0000
++++ hda1_modify/usr/syno/etc.defaults/hi3535ModuleInstall.sh	2022-05-07 14:03:41.618156327 +0000
+@@ -15,7 +15,7 @@
+ 
+ insert_audio()
+ {
+-    insmod ${LIB_MODULE_DIR}extdrv/tlv_320aic31.ko > /dev/null
++    #insmod ${LIB_MODULE_DIR}extdrv/tlv_320aic31.ko > /dev/null
+     insmod ${LIB_MODULE_DIR}acodec.ko
+     insmod ${LIB_MODULE_DIR}hi3535_aio.ko
+     insmod ${LIB_MODULE_DIR}hi3535_ai.ko
+@@ -32,7 +32,7 @@
+     rmmod ${LIB_MODULE_DIR}hi3535_ai
+     rmmod ${LIB_MODULE_DIR}hi3535_aio
+     rmmod ${LIB_MODULE_DIR}acodec
+-    rmmod ${LIB_MODULE_DIR}tlv_320aic31
++    #rmmod ${LIB_MODULE_DIR}tlv_320aic31
+ }
+ 
+ insert_ko()
+@@ -76,14 +76,14 @@
+     #insmod extdrv/sil9024.ko norm=11;  #1080P25
+     #insmod ${LIB_MODULE_DIR}extdrv/sil9024.ko norm=12;  #1080P30
+     
+-    insert_audio
++    #insert_audio
+ }
+ 
+ remove_ko()
+ {
+-    remove_audio
+-    rmmod sil9024
+-    rmmod gpioi2c
++    #remove_audio
++    #rmmod sil9024
++    #rmmod gpioi2c
+     rmmod hifb
+     rmmod hi3535_region
+     rmmod hi3535_ive
+diff -uNr --no-dereference hda1_src/VERSION hda1_modify/VERSION
+--- hda1_src/VERSION	1970-01-01 00:00:00.000000000 +0000
++++ hda1_modify/VERSION	2022-05-06 12:14:50.098008802 +0000
+@@ -0,0 +1,13 @@
++majorversion="6"
++minorversion="1"
++productversion="6.1.7"
++buildphase="GM"
++buildnumber="15284"
++smallfixnumber="0"
++builddate="2018/05/19"
++buildtime="09:18:51"
++unique="synology_hi3535_nvr216"
++extractsize=609468
++indexdbextractsize=4664
++synohdpackimgextractsize=17624
++packageextractsize=329272

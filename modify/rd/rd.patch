@@ -1,0 +1,212 @@
+File rd_src/rootfs/dev/console is a character special file while file rd_modify/rootfs/dev/console is a character special file
+File rd_src/rootfs/dev/net/tun is a character special file while file rd_modify/rootfs/dev/net/tun is a character special file
+diff -uNr --no-dereference rd_src/rootfs/etc/passwd rd_modify/rootfs/etc/passwd
+--- rd_src/rootfs/etc/passwd	2022-05-06 12:15:59.398998330 +0000
++++ rd_modify/rootfs/etc/passwd	2022-05-06 12:15:55.942998854 +0000
+@@ -1,4 +1,4 @@
+-root:x:0:0::/root:/bin/ash
++root::0:0::/root:/bin/ash
+ system:x:1:1::/usr/syno/synoman:/usr/bin/nologin
+ daemon:x:2:2::/:/bin/sh
+ lp:x:7:7::/var/spool/lpd:/bin/sh
+@@ -16,5 +16,5 @@
+ dovecot:x:143:143::/dev/null:/usr/bin/nologin
+ ldap:x:439:439::/var/lib/openldap:/usr/bin/nologin
+ http:x:1023:1023::/var/services/web:/bin/false
+-admin:x:1024:100:System default user:/var/services/homes/admin:/bin/sh
++admin::1024:100:System default user:/var/services/homes/admin:/bin/sh
+ guest:x:1025:100:Guest:/nonexist:/usr/bin/nologin
+diff -uNr --no-dereference rd_src/rootfs/etc/rc rd_modify/rootfs/etc/rc
+--- rd_src/rootfs/etc/rc	2022-05-06 12:15:59.448998322 +0000
++++ rd_modify/rootfs/etc/rc	2022-05-06 12:15:55.927998856 +0000
+@@ -312,12 +312,12 @@
+ 	[ -z "$ret" ]
+ }
+ 
+-RCMsg "Starting scemd"
+-if ! scemd ; then
+-	MsgWarn "Failed to start scemd. Reboot and get into steel plan or network install mode."
+-	touch "/.noroot"
+-	reboot
+-fi
++#RCMsg "Starting scemd"
++#if ! scemd ; then
++#	MsgWarn "Failed to start scemd. Reboot and get into steel plan or network install mode."
++#	touch "/.noroot"
++#	reboot
++#fi
+ 
+ if is_mtest_bootloader_support && is_bootloader_mtest_tested; then
+ 	sh -c "echo 9 > /dev/ttyS1"
+diff -uNr --no-dereference rd_src/rootfs/etc/rc.network rd_modify/rootfs/etc/rc.network
+--- rd_src/rootfs/etc/rc.network	2022-05-06 12:15:59.471998319 +0000
++++ rd_modify/rootfs/etc/rc.network	2022-05-07 13:25:26.445317130 +0000
+@@ -804,6 +804,9 @@
+ 		# so when the string part eth was removed, only the numerical part will be left
+ 		return;
+ 	fi
++	echo "default hardware mac"
++	return;
++		
+ 	macIndex=`expr ${macIndex} + 1`
+ 	if [ "${specific_mac}" != "" ]; then
+ 		macIndex=${specific_mac}
+diff -uNr --no-dereference rd_src/rootfs/etc/synoinfo.conf rd_modify/rootfs/etc/synoinfo.conf
+--- rd_src/rootfs/etc/synoinfo.conf	2022-05-06 12:15:59.393998331 +0000
++++ rd_modify/rootfs/etc/synoinfo.conf	2022-05-06 12:15:55.913998858 +0000
+@@ -30,7 +30,7 @@
+ support_fw_security="yes"
+ support_directory_service="yes"
+ support_power_schedule="yes"
+-support_buzzer="yes"
++support_buzzer="no"
+ support_poweroff="yes"
+ supporttrustdomain="yes"
+ support_ipsec="yes"
+@@ -91,7 +91,7 @@
+ auto_poweroff_timer="0"
+ enableguest="no"
+ usbbkp="yes"
+-usbcopy="no"
++usbcopy="yes"
+ netbkp="no"
+ supportmediaservice="yes"
+ runmediaservice="no"
+@@ -127,7 +127,7 @@
+ maxaccounts="1024"
+ maxgroups="256"
+ maxshares="256"
+-maxdisks="2"
++maxdisks="7"
+ maxprinters="2"
+ maxlogsize="64"
+ 
+@@ -224,7 +224,7 @@
+ enable_fan_debug="0x0"
+ 
+ # Add key for support fan model
+-support_fan="yes"
++support_fan="no"
+ 
+ # Disk options
+ BS_Thr_Enable="yes"
+@@ -247,11 +247,11 @@
+ sdcopy="no"
+ disable_join_cms_host="yes"
+ supportraidcross="yes"
+-disable_exfat="yes"
++disable_exfat="no"
+ supportsystemperature="yes"
+ support_syno_hybrid_raid="yes"
+ maxservices="256"
+-support_fan_adjust_dual_mode="yes"
++support_fan_adjust_dual_mode="no"
+ satadeepsleeptimer="1"
+ is_business_model="no"
+ esataportcfg="0x4"
+diff -uNr --no-dereference rd_src/rootfs/etc/sysctl_asic.sh rd_modify/rootfs/etc/sysctl_asic.sh
+--- rd_src/rootfs/etc/sysctl_asic.sh	1970-01-01 00:00:00.000000000 +0000
++++ rd_modify/rootfs/etc/sysctl_asic.sh	2022-05-06 12:13:54.222017100 +0000
+@@ -0,0 +1,64 @@
++#!/bin/sh
++
++#Andy
++#sata control
++himm 0x200f0084 0x1
++himm 0x201f0400 0x50
++himm 0x201f0100 0x40
++
++#USB3.0 control
++#himm 0x200f00EC 0x0
++#himm 0x200f00F0 0x0
++#himm 0x201A0400 0x30
++#himm 0x201A00C0 0x10
++himm 0x200f00EC 0x1
++himm 0x200f00F0 0x1
++himm 0x20120084 0x00040fc0
++
++#linux net
++himm 0x12020014 0x5
++himm 0x12020010 0x1743
++himm 0x12020014 0x100
++himm 0x12020010 0x1783
++
++#HDMI
++himm 0x200F00F4 0x1
++himm 0x200F00F8 0x1
++himm 0x200F00FC 0x1
++himm 0x200F0100 0x1
++
++#sata
++himm 0x12010148 0x376eb8;
++himm 0x1201014c 0x0a280;
++himm 0x12010174 0x6f180000;
++himm 0x12010174 0x6f390000;
++himm 0x12010174 0x6f5a0000;
++himm 0x12010174 0x6f390000;
++himm 0x12010174 0x6f180000;
++himm 0x12010174 0x6f390000;
++himm 0x12010174 0x6f5a0000;
++
++himm 0x120101c8 0x376eb8;
++himm 0x120101cc 0x0a280;
++himm 0x120101f4 0x6f180000;
++himm 0x120101f4 0x6f390000;
++himm 0x120101f4 0x6f5a0000;
++himm 0x120101f4 0x6f390000;
++himm 0x120101f4 0x6f180000;
++himm 0x120101f4 0x6f390000;
++himm 0x120101f4 0x6f5a0000;
++
++himm 0x12010248 0x376eb8;
++himm 0x1201024c 0x0a280;
++himm 0x12010274 0x6f180000;
++himm 0x12010274 0x6f390000;
++himm 0x12010274 0x6f5a0000;
++himm 0x12010274 0x6f390000;
++himm 0x12010274 0x6f180000;
++himm 0x12010274 0x6f390000;
++himm 0x12010274 0x6f5a0000;
++
++himm 0x12010174 0x0E390000;
++himm 0x120101f4 0x0E390000;
++himm 0x12010274 0x0E390000;
++
+diff -uNr --no-dereference rd_src/rootfs/linuxrc.syno rd_modify/rootfs/linuxrc.syno
+--- rd_src/rootfs/linuxrc.syno	2022-05-06 12:15:56.452998776 +0000
++++ rd_modify/rootfs/linuxrc.syno	2022-05-07 13:56:29.734718372 +0000
+@@ -285,6 +285,28 @@
+ 	fi
+ }
+ 
++# Set pin mux for HI3535
++if [ "hi3535" == `/bin/get_key_value /etc.defaults/synoinfo.conf unique | cut -d"_" -f2` ]; then
++    cd /usr/sbin/
++	./btools -i
++	cd /usr/lib/modules/
++	echo "insmod usb storage early..."
++	
++	insmod ehci-hcd.ko
++	insmod ohci-hcd.ko
++	insmod xhci-hcd.ko
++	insmod usb-storage.ko
++	
++	#echo "[SYNO] set pin mux for hi3535 " > /dev/kmsg
++	#. /etc/rc.clkcfg_hi3535 > /dev/null || echo "[SYNO] fail to run rc.clkcfg_hi3535" > /dev/kmsg
++	#. /etc/rc.sysctl_hi3535 > /dev/null || echo "[SYNO] fail to run rc.sysctl_hi3535" > /dev/kmsg
++	#. /etc/rc.pinctrl_hi3535_aic31 > /dev/null || echo "[SYNO] fail to run rc.pinctrl_hi3535_aic31" > /dev/kmsg
++	#. /etc/sysctl_asic.sh > /dev/null || echo "[SYNO] fail to run sysctl_asic.sh" > /dev/kmsg
++
++	sleep 3
++fi
++
++
+ Ret=0
+ 
+ #
+Binary files rd_src/rootfs/usr/lib/modules/cdc-acm.ko and rd_modify/rootfs/usr/lib/modules/cdc-acm.ko differ
+Binary files rd_src/rootfs/usr/lib/modules/ehci-hcd.ko and rd_modify/rootfs/usr/lib/modules/ehci-hcd.ko differ
+Binary files rd_src/rootfs/usr/lib/modules/ohci-hcd.ko and rd_modify/rootfs/usr/lib/modules/ohci-hcd.ko differ
+Binary files rd_src/rootfs/usr/lib/modules/usb-storage.ko and rd_modify/rootfs/usr/lib/modules/usb-storage.ko differ
+Binary files rd_src/rootfs/usr/lib/modules/xhci-hcd.ko and rd_modify/rootfs/usr/lib/modules/xhci-hcd.ko differ
+Binary files rd_src/rootfs/usr/sbin/btools and rd_modify/rootfs/usr/sbin/btools differ
