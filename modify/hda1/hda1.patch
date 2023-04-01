@@ -177,7 +177,7 @@ diff -uNr --no-dereference hda1_src/etc.defaults/sysctl_asic.sh hda1_modify/etc.
 +
 diff -uNr --no-dereference hda1_src/usr/syno/etc.defaults/hi3535ModuleInstall.sh hda1_modify/usr/syno/etc.defaults/hi3535ModuleInstall.sh
 --- hda1_src/usr/syno/etc.defaults/hi3535ModuleInstall.sh	2022-05-06 12:15:09.889005819 +0000
-+++ hda1_modify/usr/syno/etc.defaults/hi3535ModuleInstall.sh	2022-05-07 14:03:41.618156327 +0000
++++ hda1_modify/usr/syno/etc.defaults/hi3535ModuleInstall.sh	2022-05-08 10:48:37.268767989 +0000
 @@ -15,7 +15,7 @@
  
  insert_audio()
@@ -196,7 +196,18 @@ diff -uNr --no-dereference hda1_src/usr/syno/etc.defaults/hi3535ModuleInstall.sh
  }
  
  insert_ko()
-@@ -76,14 +76,14 @@
+@@ -43,7 +43,9 @@
+     # sh ./pinctrl_hi3535_aic31.sh > /dev/null
+ 
+ # Linux 640MB, and 384MB for MMZ
+-    insmod ${LIB_MODULE_DIR}mmz.ko mmz=anonymous,0,0xA8000000,384M anony=1 || report_error
++    #insmod ${LIB_MODULE_DIR}mmz.ko mmz=anonymous,0,0xA8000000,384M anony=1 || report_error
++# Linux 896MB, and 128MB for MMZ
++    insmod ${LIB_MODULE_DIR}mmz.ko mmz=anonymous,0,0xB8000000,128M anony=1 || report_error    
+     insmod ${LIB_MODULE_DIR}hiuser.ko
+     insmod ${LIB_MODULE_DIR}hi3535_base.ko
+     insmod ${LIB_MODULE_DIR}hi3535_sys.ko
+@@ -76,14 +78,14 @@
      #insmod extdrv/sil9024.ko norm=11;  #1080P25
      #insmod ${LIB_MODULE_DIR}extdrv/sil9024.ko norm=12;  #1080P30
      

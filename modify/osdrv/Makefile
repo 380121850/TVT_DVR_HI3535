@@ -114,6 +114,7 @@ hiboot:
 	rm $(OSDRV_DIR)/uboot/u-boot-2010.06 -rf
 	tar xzf $(OSDRV_DIR)/uboot/u-boot-2010.06.tgz -C $(OSDRV_DIR)/uboot
 	find $(OSDRV_DIR)/uboot/u-boot-2010.06 | xargs touch
+	cp -rf $(OSDRV_DIR_MODIFY)/uboot/u-boot-2010.06/* $(OSDRV_DIR)/uboot/u-boot-2010.06/
 	make -C $(OSDRV_DIR)/uboot/u-boot-2010.06 ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- $(CHIP_BOOT_CFG)
 	pushd $(OSDRV_DIR)/uboot/u-boot-2010.06;make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- -j 20 >/dev/null;popd
 	cp $(OSDRV_DIR)/uboot/u-boot-2010.06/u-boot.bin $(OSDRV_DIR)/pub/$(PUB_IMAGE)

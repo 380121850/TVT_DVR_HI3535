@@ -3,13 +3,37 @@
 #	prepare param
 ##########################################################################################
 export OSDRV_DIR=$(shell pwd)
-export OSDRV_CROSS
+export OSDRV_CROSS=arm-hisiv200-linux
 export OSDRV_SIZE ?= full
 export CHIP=hi3535
 export REG_INFO_BIN
 export UBOOT_IMAGE_BIN
 export ARCH=arm
 export CROSS_COMPILE=$(OSDRV_CROSS)-
+export RLS_VERSION=release 
+export PCI_MODE=none
+
+export OSDRV_DIR_MODIFY=$(OSDRV_DIR)/../../modify/osdrv/
+
+export KERNEL_TYPE=dsm
+
+ifeq ($(KERNEL_TYPE),hisi)
+export KERNEL_VER=linux-3.4.y
+export KERNEL_TAR_FILE=$(KERNEL_VER).tgz
+export KERNEL_TAR_CMD=tar xzf
+endif
+
+ifeq ($(KERNEL_TYPE),dsm)
+export KERNEL_VER=linux-3.4.x
+export KERNEL_TAR_FILE=hi3535-linux-3.4.x.txz
+export KERNEL_TAR_CMD=tar xJf
+endif
+
+export KERNEL_DIR=$(OSDRV_DIR)/kernel/$(KERNEL_VER)/
+export KERNEL_MODIFY_DIR=$(OSDRV_DIR_MODIFY)/kernel/$(KERNEL_VER)/
+export KernelTargetOutPath=$(OSDRV_DIR)/pub/dsm/
+export KO_TARGET_DIR=$(OSDRV_DIR)/pub/dsm/
+
 
 # if CHIP is support, we set SUPPORT_CHIP = "yes"
 SUPPORT_CHIP := "no"
@@ -69,8 +93,8 @@ SUPPORT_CHIP = "yes"
 endif ###end hi3535
 
 JFFS2_IMAGE_BIN_64K:=rootfs_$(CHIP)_64k.jffs2
+JFFS2_IMAGE_BIN_128K:=rootfs_$(CHIP)_128k.jffs2
 JFFS2_IMAGE_BIN_256K:=rootfs_$(CHIP)_256k.jffs2
-
 ifneq ($(SUPPORT_CHIP), "yes")
 $(error $(CHIP) not surpport!)
 endif
@@ -109,9 +133,10 @@ endif
 ##########################################################################################
 hiboot:
 	@echo "---------task [1]	build boot"
-	rm $(OSDRV_DIR)/uboot/u-boot-2010.06 -rf
-	tar xzf $(OSDRV_DIR)/uboot/u-boot-2010.06.tgz -C $(OSDRV_DIR)/uboot
+	#rm $(OSDRV_DIR)/uboot/u-boot-2010.06 -rf
+	#tar xzf $(OSDRV_DIR)/uboot/u-boot-2010.06.tgz -C $(OSDRV_DIR)/uboot
 	find $(OSDRV_DIR)/uboot/u-boot-2010.06 | xargs touch
+	cp -rf $(OSDRV_DIR_MODIFY)/uboot/u-boot-2010.06/* $(OSDRV_DIR)/uboot/u-boot-2010.06/
 	make -C $(OSDRV_DIR)/uboot/u-boot-2010.06 ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- $(CHIP_BOOT_CFG)
 	pushd $(OSDRV_DIR)/uboot/u-boot-2010.06;make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- -j 20 >/dev/null;popd
 	cp $(OSDRV_DIR)/uboot/u-boot-2010.06/u-boot.bin $(OSDRV_DIR)/pub/$(PUB_IMAGE)
@@ -132,16 +157,27 @@ hiboot_clean:
 ##########################################################################################
 hikernel:
 	@echo "---------task [2] build kernel"
-	rm $(OSDRV_DIR)/kernel/linux-3.4.y -rf
-	tar xzf $(OSDRV_DIR)/kernel/linux-3.4.y.tgz -C $(OSDRV_DIR)/kernel/
-	find $(OSDRV_DIR)/kernel/linux-3.4.y | xargs touch
-	make -C $(OSDRV_DIR)/kernel/linux-3.4.y ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- $(CHIP_KERNEL_CFG)
-	pushd $(OSDRV_DIR)/kernel/linux-3.4.y;make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- -j 20 >/dev/null;popd
-	pushd $(OSDRV_DIR)/kernel/linux-3.4.y;make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- uImage -j 20 >/dev/null;popd
-	cp $(OSDRV_DIR)/kernel/linux-3.4.y/arch/arm/boot/uImage $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(KERNEL_IMAGE_BIN)
+	#rm -rf $(KERNEL_DIR)
+	#$(KERNEL_TAR_CMD) $(OSDRV_DIR)/kernel/$(KERNEL_TAR_FILE)  -C $(OSDRV_DIR)/kernel/
+	#find $(KERNEL_DIR) | xargs touch
+	cp -rf $(KERNEL_MODIFY_DIR)/* $(KERNEL_DIR)
+	make -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(OSDRV_CROSS)- $(CHIP_KERNEL_CFG)
+	make -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(OSDRV_CROSS)- -j 16 uImage;
+	cp $(KERNEL_DIR)/arch/arm/boot/uImage  $(KernelTargetOutPath)/$(KERNEL_IMAGE_BIN)
+
+hikernel_menuconfig:
+	make -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(OSDRV_CROSS)- $(CHIP_KERNEL_CFG)
+	make -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(OSDRV_CROSS)-  menuconfig
+
+hikernel_savecfg:
+	cp $(KERNEL_DIR)/.config  $(KERNEL_MODIFY_DIR)/arch/arm/configs/$(CHIP_KERNEL_CFG);
+
+hikernel_modules: kernel
+	make -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(OSDRV_CROSS)- modules -j 16
+	make -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(OSDRV_CROSS)- modules_install INSTALL_MOD_PATH=$(KO_TARGET_DIR)
 
 hikernel_clean:
-	rm $(OSDRV_DIR)/kernel/linux-3.4.y -rf
+	make -C $(KERNEL_DIR) ARCH=$(ARCH) CROSS_COMPILE=$(OSDRV_CROSS)- distclean
 
 ##########################################################################################
 #task [3]	prepare drv
@@ -184,28 +220,32 @@ hi_dvfs_clean:
 ##########################################################################################
 #task [4]	prepare rootfs
 ##########################################################################################
+export ROOTFS_MODIFY_DIR=$(OSDRV_DIR_MODIFY)/rootfs_scripts/rootfs/
+
 hirootfs_prepare:
 	@echo "---------task [4] prepare rootfs"
 	tar xzf $(OSDRV_DIR)/rootfs_scripts/rootfs.tgz -C $(OSDRV_DIR)/pub
+	cp -rf  $(ROOTFS_MODIFY_DIR)/*  $(OSDRV_DIR)/pub/rootfs/
 	mv $(OSDRV_DIR)/pub/rootfs $(OSDRV_DIR)/pub/$(PUB_ROOTFS)
 	tar xzf $(OSDRV_DIR)/toolchain/$(OSDRV_CROSS)/runtime_lib/$(TOOLCHAIN_RUNTIME_LIB)/$(TOOLCHAIN_RUNTIME_LIB_C) \
 		-C $(OSDRV_DIR)/pub/$(PUB_ROOTFS)
 	tar xzf $(OSDRV_DIR)/toolchain/$(OSDRV_CROSS)/runtime_lib/$(TOOLCHAIN_RUNTIME_LIB)/lib.stdc++.tgz \
 		-C $(OSDRV_DIR)/pub/$(PUB_ROOTFS)
 ifeq ($(CHIP),hi3535)
-	cp $(OSDRV_DIR)/kernel/linux-3.4.y/drivers/net/ethernet/stmmac/stmmac.ko $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/hitoe
-	chmod 777 $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/hitoe/*
+	#cp $(OSDRV_DIR)/kernel/linux-3.4.y/drivers/net/ethernet/stmmac/stmmac.ko $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/hitoe
+	#chmod 777 $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/hitoe/*
 endif
 
 ##########################################################################################
 #task [5]	build busybox
 ##########################################################################################
-hibusybox:
+hibusybox:hirootfs_prepare
 	@echo "---------task [5] build busybox"
 	rm $(OSDRV_DIR)/busybox/busybox-1.16.1 -rf
 	tar xzf $(OSDRV_DIR)/busybox/busybox-1.16.1.tgz -C $(OSDRV_DIR)/busybox
 	find $(OSDRV_DIR)/busybox/busybox-1.16.1 | xargs touch
 	cp $(OSDRV_DIR)/busybox/busybox-1.16.1/$(BUSYBOX_CFG) $(OSDRV_DIR)/busybox/busybox-1.16.1/.config
+	cp $(OSDRV_DIR_MODIFY)/busybox/busybox-1.16.1/Makefile $(OSDRV_DIR)/busybox/busybox-1.16.1/
 	pushd $(OSDRV_DIR)/busybox/busybox-1.16.1/;make -j 20 >/dev/null;popd
 	make -C $(OSDRV_DIR)/busybox/busybox-1.16.1 install
 	cp -af $(OSDRV_DIR)/busybox/busybox-1.16.1/_install/* $(OSDRV_DIR)/pub/$(PUB_ROOTFS)
@@ -216,7 +256,7 @@ hibusybox_clean:
 ##########################################################################################
 #task [6]	build board tools
 ##########################################################################################
-hiboardtools:
+hiboardtools:hirootfs_prepare
 	@echo "---------task [6] build tools which run on board"
 	make -C $(OSDRV_DIR)/tools/board_tools/e2fsprogs
 	make -C $(OSDRV_DIR)/tools/board_tools/reg-tools-1.0.0 CHIP=$(CHIP)
@@ -226,12 +266,12 @@ hiboardtools:
 	cp -af $(OSDRV_DIR)/tools/board_tools/reg-tools-1.0.0/hiddrs $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/bin
 	cp -af $(OSDRV_DIR)/tools/board_tools/reg-tools-1.0.0/hil2s $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/bin
 	cp -af $(OSDRV_DIR)/tools/board_tools/reg-tools-1.0.0/hie* $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/bin
-	make -C $(OSDRV_DIR)/tools/board_tools/udev-100
+	make -C $(OSDRV_DIR)/tools/board_tools/udev-100 all
 	cp $(OSDRV_DIR)/tools/board_tools/gdb/gdb-$(OSDRV_CROSS) $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)
 	find $(OSDRV_DIR)/tools/board_tools/mtd-utils/ -name 'configure' | xargs chmod +x
 	pushd $(OSDRV_DIR)/tools/board_tools/mtd-utils;make >/dev/null;popd
 	cp $(OSDRV_DIR)/tools/board_tools/mtd-utils/bin/arm/* $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)
-	rm $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)/ubi* -rf
+	#rm $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)/ubi* -rf
 	cp $(OSDRV_DIR)/tools/board_tools/parted/parted-3.0/bin/sbin/parted $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)/;
 	cp $(OSDRV_DIR)/tools/board_tools/parted/parted-3.0/bin/sbin/partprobe $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)/;
 
@@ -260,18 +300,19 @@ hipctools_clean:
 ##########################################################################################
 #task [8]	build rootfs
 ##########################################################################################
-hirootfs_build:
+hirootfs_build:hibusybox hiboardtools hipctools
 	@echo "---------task [8] build rootfs"
 	chmod 777 $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)/*
 	chmod 777 $(OSDRV_DIR)/pub/bin/pc/*
 	rm $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/dev/* -rf
 	pushd $(OSDRV_DIR)/pub/$(PUB_ROOTFS);ln -s sbin/init init;popd
-	pushd $(OSDRV_DIR)/pub/bin/pc; ./mkfs.jffs2 -d $(OSDRV_DIR)/pub/$(PUB_ROOTFS) -l -e 0x40000 -o $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(JFFS2_IMAGE_BIN_256K);popd
-	pushd $(OSDRV_DIR)/pub/bin/pc; ./mkfs.jffs2 -d $(OSDRV_DIR)/pub/$(PUB_ROOTFS) -l -e 0x10000 -o $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(JFFS2_IMAGE_BIN_64K);popd
+	#pushd $(OSDRV_DIR)/pub/bin/pc; ./mkfs.jffs2 -d $(OSDRV_DIR)/pub/$(PUB_ROOTFS) -l -e 0x40000 -o $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(JFFS2_IMAGE_BIN_256K);popd
+	pushd $(OSDRV_DIR)/pub/bin/pc; ./mkfs.jffs2 -d $(OSDRV_DIR)/pub/$(PUB_ROOTFS) -l -e 0x20000 -o $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(JFFS2_IMAGE_BIN_128K);popd
+	#pushd $(OSDRV_DIR)/pub/bin/pc; ./mkfs.jffs2 -d $(OSDRV_DIR)/pub/$(PUB_ROOTFS) -l -e 0x10000 -o $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(JFFS2_IMAGE_BIN_64K);popd
 	pushd $(OSDRV_DIR)/pub/bin/pc; ./mkyaffs2image504 $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/ $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(YAFFS2_IMAGE_BIN) 1 2;popd
 	chmod 644 $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(YAFFS2_IMAGE_BIN)
 	find $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/ -name '*svn' | xargs rm -rf
-	pushd $(OSDRV_DIR)/pub;tar czf $(PUB_ROOTFS).tgz $(PUB_ROOTFS);rm $(PUB_ROOTFS) -rf;popd
+	pushd $(OSDRV_DIR)/pub;tar czf $(PUB_ROOTFS).tgz $(PUB_ROOTFS);popd
 	@echo "---------finish osdrv work"
 
 hirootfs_clean:

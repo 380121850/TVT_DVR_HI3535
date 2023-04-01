@@ -8,7 +8,7 @@
 	make OSDRV_CROSS=arm-hisiv100nptl-linux CHIP=hi3535 RLS_VERSION=release PCI_MODE=master all
 	d.编译PCIE slave、release版本目录：
 	make OSDRV_CROSS=arm-hisiv100nptl-linux CHIP=hi3535 RLS_VERSION=release PCI_MODE=slave all
-
+	
 	注意：
 	使用glibc库时：OSDRV_CROSS=arm-hisiv200-linux 替换OSDRV_CROSS=arm-hisiv100nptl-linux。在此不再累述。
 
