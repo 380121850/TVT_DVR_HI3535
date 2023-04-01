@@ -17,7 +17,7 @@ export MPP_BUILD=n
 
 # use HIARCH indicate chip, use libc to choose cross compiler.
 export HIARCH?=hi3535
-export LIBC?=uclibc
+export LIBC?=glibc
 
 # Whether support the debug information. HI_DEBUG or HI_RELEASE
 export HIDBG?=HI_RELEASE
@@ -85,7 +85,7 @@ export DRV_ROOT?=$(SDK_PATH)/drv
 ifneq ($(shell ls $(HIWORK_PATH)/osdrv$(HIARCH)$(CVER)), )
 	export LINUX_ROOT?=$(HIWORK_PATH)/osdrv$(HIARCH)$(CVER)/kernel/linux-3.4.y
 else
-	export LINUX_ROOT?=$(SDK_PATH)/osdrv/kernel/linux-3.4.y
+	export LINUX_ROOT?=$(SDK_PATH)/osdrv/kernel/linux-3.4.x
 endif
 
 # Define cross compiler

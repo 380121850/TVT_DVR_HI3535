@@ -13,7 +13,7 @@ report_error()
 
 insert_audio()
 {
-    insmod extdrv/tlv_320aic31.ko > /dev/null
+    #insmod extdrv/tlv_320aic31.ko > /dev/null
     insmod acodec.ko
     insmod hi3535_aio.ko
     insmod hi3535_ai.ko
@@ -30,16 +30,16 @@ remove_audio()
     rmmod hi3535_ai
     rmmod hi3535_aio
     rmmod acodec
-    rmmod tlv_320aic31
+    #rmmod tlv_320aic31
 }
 
 insert_ko()
 {
     sh ./clkcfg_hi3535.sh > /dev/null
     sh ./sysctl_hi3535.sh > /dev/null
-    sh ./pinctrl_hi3535_aic31.sh > /dev/null
+    #sh ./pinctrl_hi3535_aic31.sh > /dev/null
 
-    insmod mmz.ko mmz=anonymous,0,0x84000000,442M:jpeg,0,0x9fa00000,5M anony=1 || report_error
+    insmod mmz.ko mmz=anonymous,0,0xA0000000,506M:jpeg,0,0xBFA00000,5M anony=1 || report_error
     insmod hi3535_base.ko
     insmod hi3535_sys.ko
     insmod hi3535_tde.ko
