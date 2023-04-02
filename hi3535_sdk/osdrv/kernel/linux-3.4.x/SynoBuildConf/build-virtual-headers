@@ -1,0 +1,24 @@
+#!/bin/bash
+# Copyright (c) 2000-2016 Synology Inc. All rights reserved.
+# vim:ft=sh
+
+export ARCH=${ARCH}
+case "$BUILD_TARGET" in
+	HISILICON_HI3535)
+		CC=`echo ${CC} | awk -F" " '{print $1}'`
+		export CROSS_COMPILE=${ToolChainPrefix} CC="${CC}"
+		KERNEL_CC="${CC}"
+		;;
+	*)
+		return
+		;;
+esac
+
+cp -f synoconfigs/$PLATFORM_ABBR .config
+
+# Install kernel headers
+make oldconfig
+make prepare
+make CROSS_COMPILE="$ToolChainPrefix32" headers_install
+
+cp -fa include/linux/syno_autoconf.h usr/include/linux/syno_autoconf.h

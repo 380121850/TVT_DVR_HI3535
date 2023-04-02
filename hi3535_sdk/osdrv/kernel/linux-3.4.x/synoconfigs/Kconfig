@@ -1,0 +1,55 @@
+# description of the syntax of this configuration file,
+# see Documentation/kbuild/kconfig-language.txt.
+#
+
+menu "Synology special config"
+
+config SYNO_LP3943_FEATURES
+	bool "Customized features of LP3943 led dirver for Synology Corp. NAS product"
+	depends on LEDS_LP3943
+	default n
+
+config SYNO_FORCE_EH_FULL_RECOVER_RETRY
+        bool "Force to reset all links of a PMP while retrying EH recover"
+        default y
+
+config SYNO_DISPLAY_CPUINFO
+    bool "Support display CPU Infomation"
+
+config SYNO_GPIO_DEVICE
+	depends on SYNO_HI3535_NVR
+	bool "add a fake gpio device for gpio library."
+
+config SYNO_I2C_DEVICE
+	depends on SYNO_HI3535_NVR && SYNO_GPIO_DEVICE
+	bool "enable I2C by GPIO simulated"
+
+config SYNO_FIX_THERMAL_SENSOR
+	depends on SYNO_I2C_DEVICE
+	bool "fix LM75 nack issue"
+
+config SYNO_HI3535_SUPPORT_WOL
+	bool "Enable Wake On LAN on hi3535 platform"
+	default y
+	depends on SYNO_HI3535_NVR
+
+config SYNO_HI3535_SW_SATA_LED
+	bool "Enable software SATA LED"
+	default y
+	depends on SYNO_HI3535_NVR
+
+config SYNO_LP3943_REVERSE_BRIGHTNESS
+	bool "Reverse brightness setting"
+	depends on SYNO_LP3943_FEATURES
+	default y
+
+config SYNO_ENABLE_USBFS_ENTRY
+	bool "Add USB entry to /proc/bus"
+	default y
+
+config SYNO_INCREASE_SKB_SIZE
+	bool "Increase skb size to 2K"
+	default y
+	depends on SYNO_HI3535_NVR
+
+endmenu

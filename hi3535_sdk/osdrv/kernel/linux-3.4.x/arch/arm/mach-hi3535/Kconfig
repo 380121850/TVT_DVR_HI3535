@@ -1,0 +1,104 @@
+menu "HI3535 board feature"
+
+config MACH_HI3535
+	bool "Support hi3535 platform"
+	select CPU_V7
+	select ARM_GIC
+	select ARM_TIMER_SP804
+	help
+	  Include support for the hisilion HI3535 platform.
+	  HI3535 support ARM CORTEX-A9 processer,
+	  within a Generic Interrupt Controller.
+	  Support DDR2 and DDR3.
+choice
+        prompt "CPU timer source"
+        default HAVE_SP804_LOCAL_TIMER
+
+config HAVE_SP804_LOCAL_TIMER
+	bool "arm local timer from sp804"
+	help
+	  arm local timer from sp804.
+	  if you choice sp804 as local timer,
+	  please select HAVE_SP804_LOCAL_TIMER,
+	  if you choice arm selt as local timer,
+	  please select HAVE_ARM_LOCAL_TIMER.
+
+config HAVE_ARM_LOCAL_TIMER
+	bool "arm local timer from arm self"
+	help
+	  arm local timer from arm self.
+	  if you choice sp804 as local timer,
+	  please select HAVE_SP804_LOCAL_TIMER,
+	  if you choice arm selt as local timer,
+	  please select HAVE_ARM_LOCAL_TIMER.
+
+endchoice
+
+config DEFAULT_BUSCLK
+	int "DEFAULT_BUSCLK"
+	default "50000000"
+	help
+	  Default AHB clock rate
+
+endmenu
+
+menu "Hi3535 SoC in Synology's options"
+    depends on MACH_HI3535
+
+config SYNO_HI3535_NVR
+    bool "synology hi3535 NVR porting define"
+    default y
+    depends on MACH_HI3535
+    select ARCH_REQUIRE_GPIOLIB
+
+config SYNO_HI3535_VS
+    bool "synology hi3535 vs porting define"
+    default y
+    depends on MACH_HI3535
+
+config SYNO_MAC_ADDRESS
+    bool "read synology mac address from nand flash"
+    default y
+    depends on SYNO_HI3535_VS || SYNO_HI3535_NVR
+ 	---help---
+	read mac address from "vender" partition within nand flash
+
+config SYNO_MAC_IF
+	int "number of available network interface"
+	default 1
+	depends on SYNO_MAC_ADDRESS
+	---help---
+    available network interface on this system
+
+config SYNO_SERIAL
+    bool "read synology serial number from nand flash"
+    default y
+    depends on SYNO_HI3535_VS || SYNO_HI3535_NVR
+	 ---help---
+	read serial number from "vender" partition within nand flash
+
+config SYNO_FACTORY_USB3_DISABLE
+	bool "Temporarily disable the USB3 function of USB3 port"
+	default y
+	depends on SYNO_HI3535_VS || SYNO_HI3535_NVR
+	---help---
+	For Factory production purpose , disable USB3 function of USB3 port
+
+config SYNO_SKIP_RXDROP_BY_CORE
+	bool "Fix RX packets drop is increasing"
+	default y
+	depends on SYNO_HI3535_VS || SYNO_HI3535_NVR
+	---help---
+	Fix: Linux-2.6.38 #241 RX packets drop is increasing
+	Dsc: rx_dropped counts packets dropped by driver "and kernel core"
+	this define will let it only record the packets dropped by driver
+	please refer to caf586e5, 8990f468a
+
+config HI3535_SDK_2050
+	bool "using enable Hi3535 SDK 2.0.50 patch"
+	default y
+	depends on SYNO_HI3535_VS || SYNO_HI3535_NVR
+	---help---
+	apply hi3535 SDK 2.0.50 patch 
+
+endmenu

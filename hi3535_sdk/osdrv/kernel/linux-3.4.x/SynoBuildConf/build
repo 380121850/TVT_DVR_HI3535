@@ -1,0 +1,83 @@
+#!/bin/bash
+# Copyright (c) 2000-2016 Synology Inc. All rights reserved.
+# vim:ft=sh
+
+# ========================================================================
+# To specify which platform depends on this kernel,
+# please edit the section [platform kernel] in include/project.depends
+# ========================================================================
+
+export ARCH=${ARCH}
+CC=`echo ${CC} | awk -F" " '{print $1}'`
+export CROSS_COMPILE=${ToolChainPrefix} CC="${CC}"
+KERNEL_CC="${CC}"
+KERNEL_STRIP=${STRIP}
+
+case ${MakeClean} in
+	[Yy][Ee][Ss])
+		[ -f Makefile ] && make distclean
+		;;
+esac
+
+case ${CleanOnly} in
+	[Yy][Ee][Ss])
+		return
+		;;
+esac
+
+# Version Infomation
+LNXVERSION="${KernelDir}/.version"
+if [ -f ${VERSION_FILE} ]; then
+	expr $(GetDSMBuildNumber) - 1 > ${LNXVERSION}
+fi
+
+mkdir -p ${ImageDir}/modules
+
+
+case "$BUILD_TARGET" in
+	HISILICON_HI3535)
+		KernelImage=${KernelDir}/arch/arm/boot/uImage
+		KernelConfig=synoconfigs/hi3535
+		KernelTarget=uImage
+
+		;;
+	*)
+		return
+		;;
+esac
+
+# Build kernel and modules
+rm -f ${KernelImage}
+rm -f ${ImageDir}/modules/*
+
+cp -f ${KernelConfig} .config
+mkdir -p include/linux/modules
+make oldconfig
+
+echo "===== Build Synology Linux kernel 3.4.x ====="
+make ${MAKE_FLAGS} ${KernelTarget} modules CC=${KERNEL_CC}
+
+# Check if kernel is built correctly
+if [ ! -f "${KernelImage}" ]; then
+	echo "Error! ${KernelImage} does not exist!"
+	exit 1;
+fi
+
+
+# Compare kernel config with re-generated one to see
+# if any changes or new options not reapplied to ${KernelConfig}.
+ConfigDiff=`diff -bu ${KernelConfig} .config`
+if [ -z "$ConfigDiff" ]; then
+	echo
+	echo "Kernel config matches generated .config"
+	echo
+else
+	echo ========== diff -bu ${KernelConfig} .config
+	diff -bu ${KernelConfig} .config
+	echo ========== END of diff
+
+	echo
+	echo "!!! Diff EXISTS between ${KernelConfig} & generated .config"
+	echo "!!! Recheck before committing."
+	echo
+fi
