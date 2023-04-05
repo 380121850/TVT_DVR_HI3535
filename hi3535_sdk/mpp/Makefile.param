@@ -10,7 +10,7 @@
 # endif
 
 # Define the default OS link directory.
-export HIWORK_PATH?=/hiwork
+export HIWORK_PATH?=
 
 export ARCH=arm
 export MPP_BUILD=n
