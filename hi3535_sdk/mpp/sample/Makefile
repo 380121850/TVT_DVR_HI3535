@@ -9,7 +9,8 @@ rel:
 	@cd audio;  make
 	@cd tde;    make
 	@cd ive;    make
-	@cd vgs;	  make
+	@cd vgs;	make
+	#@cd miniGUI; make
 
 clean:
 	@cd hifb;   make clean
@@ -22,6 +23,7 @@ clean:
 	@cd tde;    make clean
 	@cd ive;    make clean
 	@cd vgs;    make clean
+	@cd miniGUI;    make clean
 
 cleanall:
 	@cd hifb;   make clean;   make cleanstream
@@ -34,4 +36,5 @@ cleanall:
 	@cd tde;    make clean
 	@cd ive;    make clean
 	@cd vgs;    make clean
+	@cd miniGUI;    make clean
 

@@ -169,7 +169,7 @@ HI_S32 SAMPLE_VO_Preview_HD0_HD1_SD0(HI_VOID)
     ***************************************************/    
     /**************start Dev****************************/
     VoDev = SAMPLE_VO_DEV_DHD0;    
-    stVoPubAttr.enIntfSync = VO_OUTPUT_1080P30;
+    stVoPubAttr.enIntfSync = VO_OUTPUT_1080P60;
     stVoPubAttr.enIntfType = VO_INTF_VGA|VO_INTF_HDMI;
     stVoPubAttr.u32BgColor = 0x000000ff;
     s32Ret = SAMPLE_COMM_VO_StartDev(VoDev, &stVoPubAttr);    
@@ -638,7 +638,7 @@ HI_S32 SAMPLE_VO_Playback_HD0(HI_VOID)
     ******************************************/    
     /**************start Dev****************************/
     VoDev = SAMPLE_VO_DEV_DHD0;    
-    stVoPubAttr.enIntfSync = VO_OUTPUT_1080P30;
+    stVoPubAttr.enIntfSync = VO_OUTPUT_1080P60;
     stVoPubAttr.enIntfType = VO_INTF_VGA|VO_INTF_HDMI;
     stVoPubAttr.u32BgColor = 0x000000ff;
     s32Ret = SAMPLE_COMM_VO_StartDev(VoDev, &stVoPubAttr);    

@@ -1096,7 +1096,7 @@ HI_S32 SAMPLE_HIFB_StandardMode(HI_VOID)
         goto SAMPLE_HIFB_NoneBufMode_0;
     }
     stPubAttr.enIntfSync = VO_OUTPUT_720P50;
-    stPubAttr.enIntfType = VO_INTF_VGA;
+    stPubAttr.enIntfType = VO_INTF_VGA|VO_INTF_HDMI;
 	stPubAttr.u32BgColor = 0x0000FF;
 
     stLayerAttr.bClusterMode = HI_FALSE;
@@ -1238,7 +1238,7 @@ HI_S32 SAMPLE_HIFB_DoubleBufMode(HI_VOID)
      step 3:  start vo hd0. 
     *****************************************/
     stPubAttr.enIntfSync = VO_OUTPUT_720P50;
-    stPubAttr.enIntfType = VO_INTF_VGA;
+    stPubAttr.enIntfType = VO_INTF_VGA|VO_INTF_HDMI;
 	stPubAttr.u32BgColor = 0x0000FF;
 
     stLayerAttr.bClusterMode = HI_FALSE;
