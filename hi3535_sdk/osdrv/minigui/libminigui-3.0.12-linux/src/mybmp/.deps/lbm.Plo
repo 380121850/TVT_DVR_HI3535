@@ -1,0 +1,169 @@
+lbm.lo: lbm.c \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/stdio.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/features.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/predefs.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/sys/cdefs.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/wordsize.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/gnu/stubs.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../lib/gcc/arm-hisiv200-linux-gnueabi/4.4.1/include/stddef.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/types.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/typesizes.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/libio.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/_G_config.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/wchar.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../lib/gcc/arm-hisiv200-linux-gnueabi/4.4.1/include/stdarg.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/stdio_lim.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/sys_errlist.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/stdio.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/stdlib.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/waitflags.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/waitstatus.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/endian.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/endian.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/byteswap.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/xlocale.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/sys/types.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/time.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/sys/select.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/select.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/sigset.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/time.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/sys/sysmacros.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/pthreadtypes.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/alloca.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/string.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/string.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/string2.h \
+ /docker/opt/dsm/TVT_DVR_HI3535/hi3535_sdk/osdrv/minigui/libminigui-3.0.12-linux/include/common.h \
+ /docker/opt/dsm/TVT_DVR_HI3535/hi3535_sdk/osdrv/minigui/libminigui-3.0.12-linux/include/../mgconfig.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../lib/gcc/arm-hisiv200-linux-gnueabi/4.4.1/include-fixed/limits.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../lib/gcc/arm-hisiv200-linux-gnueabi/4.4.1/include-fixed/syslimits.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/limits.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/posix1_lim.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/local_lim.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/linux/limits.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/posix2_lim.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/xopen_lim.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/pthread.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/sched.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/sched.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/signal.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/setjmp.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/semaphore.h \
+ /docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/semaphore.h \
+ /docker/opt/dsm/TVT_DVR_HI3535/hi3535_sdk/osdrv/minigui/libminigui-3.0.12-linux/include/gdi.h \
+ /docker/opt/dsm/TVT_DVR_HI3535/hi3535_sdk/osdrv/minigui/libminigui-3.0.12-linux/include/endianrw.h \
+ /docker/opt/dsm/TVT_DVR_HI3535/hi3535_sdk/osdrv/minigui/libminigui-3.0.12-linux/src/include/readbmp.h \
+ /docker/opt/dsm/TVT_DVR_HI3535/hi3535_sdk/osdrv/minigui/libminigui-3.0.12-linux/include/endianrw.h
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/stdio.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/features.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/predefs.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/sys/cdefs.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/wordsize.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/gnu/stubs.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../lib/gcc/arm-hisiv200-linux-gnueabi/4.4.1/include/stddef.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/types.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/typesizes.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/libio.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/_G_config.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/wchar.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../lib/gcc/arm-hisiv200-linux-gnueabi/4.4.1/include/stdarg.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/stdio_lim.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/sys_errlist.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/stdio.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/stdlib.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/waitflags.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/waitstatus.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/endian.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/endian.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/byteswap.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/xlocale.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/sys/types.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/time.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/sys/select.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/select.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/sigset.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/time.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/sys/sysmacros.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/pthreadtypes.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/alloca.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/string.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/string.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/string2.h:
+
+/docker/opt/dsm/TVT_DVR_HI3535/hi3535_sdk/osdrv/minigui/libminigui-3.0.12-linux/include/common.h:
+
+/docker/opt/dsm/TVT_DVR_HI3535/hi3535_sdk/osdrv/minigui/libminigui-3.0.12-linux/include/../mgconfig.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../lib/gcc/arm-hisiv200-linux-gnueabi/4.4.1/include-fixed/limits.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../lib/gcc/arm-hisiv200-linux-gnueabi/4.4.1/include-fixed/syslimits.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/limits.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/posix1_lim.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/local_lim.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/linux/limits.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/posix2_lim.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/xopen_lim.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/pthread.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/sched.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/sched.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/signal.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/setjmp.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/semaphore.h:
+
+/docker/usr/hisi-linux/x86-arm/arm-hisiv200-linux/bin/../target/usr/include/bits/semaphore.h:
+
+/docker/opt/dsm/TVT_DVR_HI3535/hi3535_sdk/osdrv/minigui/libminigui-3.0.12-linux/include/gdi.h:
+
+/docker/opt/dsm/TVT_DVR_HI3535/hi3535_sdk/osdrv/minigui/libminigui-3.0.12-linux/include/endianrw.h:
+
+/docker/opt/dsm/TVT_DVR_HI3535/hi3535_sdk/osdrv/minigui/libminigui-3.0.12-linux/src/include/readbmp.h:
+
+/docker/opt/dsm/TVT_DVR_HI3535/hi3535_sdk/osdrv/minigui/libminigui-3.0.12-linux/include/endianrw.h:
