@@ -1,0 +1,29 @@
+#!/bin/sh
+
+#bypass mode:  net driver default use bypass mode.
+#insmod /hitoe/stmmac.ko
+
+
+#toe mode:
+#TOE mode require contiguous physical memory area per time during network transmission, while the default value in kernel is quite small. In order to ensure enough contiguous physical memory area for TOE mode, you should use the following command to enlarge avalable memory.
+#Attention, here is just an example. The specific value depends on both the number of network connections, and the total summation of each connection.
+
+echo 8192 > /proc/sys/vm/min_free_kbytes
+
+#The default value of Vfs_cache_pressure is 100. This parameter sets the virtual memory recycling directory and the i-node buffer. The higher the value is, the more serious of the tendency can be reclaimed.
+#You can use the following command to modify vfs_cache_pressure to 200, so kernel would reclaim cache and free physical memory as soon as possible. As a result, more physical memory would be left for TOE.
+#We add a module parameter to set the threshold when system could change the connection from standard TCP\IP stack to TOE. Custom could modify the value of threshold when puting the tnk module into system. The minimum of this value is 100 Byte, and the typical value is 10240 Bytes.
+
+echo 200 > /proc/sys/vm/vfs_cache_pressure
+
+#TOE can't support SACK and need open low latency, arp filter.
+#Please remark it in BYPASS.
+echo 0 > /proc/sys/net/ipv4/tcp_sack
+echo 1 > /proc/sys/net/ipv4/tcp_low_latency
+echo 1 > /proc/sys/net/ipv4/conf/all/arp_filter
+
+#insmod /hitoe/stmmac.ko hitoe=1 tnk_threshold=0
+
+ 
+
+
