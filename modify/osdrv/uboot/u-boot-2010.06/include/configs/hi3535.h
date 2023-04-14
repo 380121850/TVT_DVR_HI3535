@@ -25,6 +25,22 @@
 #define __CONFIG_HI3535_H__
 
 #include <asm/arch/platform.h>
+//#include <config_cmd_default.h>
+#define CONFIG_CMD_RUN		/* run command in env variable	*/
+
+#define CONFIG_CMD_BDI		/* bdinfo			*/
+#define CONFIG_CMD_BOOTD	/* bootd			*/
+#define CONFIG_CMD_CONSOLE	/* coninfo			*/
+#define CONFIG_CMD_ECHO		/* echo arguments		*/
+#define CONFIG_CMD_EDITENV	/* editenv			*/
+#define CONFIG_CMD_LOADB	/* loadb			*/
+#define CONFIG_CMD_LOADS	/* loads			*/
+#define CONFIG_CMD_MEMORY	/* md mm nm mw cp cmp crc base loop mtest */
+#define CONFIG_CMD_MISC		/* Misc functions like sleep etc*/
+#define CONFIG_CMD_NET		/* bootp, tftpboot, rarpboot	*/
+#define CONFIG_CMD_NFS		/* NFS support			*/
+#define CONFIG_CMD_RUN		/* run command in env variable	*/
+#define CONFIG_CMD_SAVEENV	/* saveenv			*/
 
 /* cpu_init configuration */
 #define HW_REG(a) (*(unsigned long *)(a))
