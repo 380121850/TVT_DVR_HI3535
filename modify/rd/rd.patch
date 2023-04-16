@@ -53,8 +53,8 @@ diff -uNr --no-dereference rd_src/rootfs/etc/rc.network rd_modify/rootfs/etc/rc.
  		macIndex=${specific_mac}
 diff -uNr --no-dereference rd_src/rootfs/etc/synoinfo.conf rd_modify/rootfs/etc/synoinfo.conf
 --- rd_src/rootfs/etc/synoinfo.conf	2022-05-06 12:15:59.393998331 +0000
-+++ rd_modify/rootfs/etc/synoinfo.conf	2022-05-06 12:15:55.913998858 +0000
-@@ -30,7 +30,7 @@
++++ rd_modify/rootfs/etc/synoinfo.conf	2023-04-15 15:14:00.202510460 +0000
+@@ -30,12 +30,12 @@
  support_fw_security="yes"
  support_directory_service="yes"
  support_power_schedule="yes"
@@ -63,6 +63,12 @@ diff -uNr --no-dereference rd_src/rootfs/etc/synoinfo.conf rd_modify/rootfs/etc/
  support_poweroff="yes"
  supporttrustdomain="yes"
  support_ipsec="yes"
+ supportMFP="yes"
+-support_synoacl="yes"
++support_synoacl="no"
+ support_wireless_number="2"
+ supportrcpower="yes"
+ supportext4="yes"
 @@ -91,7 +91,7 @@
  auto_poweroff_timer="0"
  enableguest="no"
