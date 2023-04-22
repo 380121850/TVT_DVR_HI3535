@@ -2346,7 +2346,7 @@ static int stmmac_probe(struct net_device *dev)
 	priv->pause = pause;
 	netif_napi_add(dev, &priv->napi, stmmac_poll, 64);
 
-#ifndef MY_ABC_HERE
+#ifdef MY_ABC_HERE
 	if (CONFIG_SYNO_MAC_IF > priv->id) {
 		pMac = grgbLanMac[priv->id];
 

@@ -581,7 +581,15 @@ out_register:
 				if (Sum==0 || ucSum!=rgbszBuf[x]) {
 					printk("vender Mac%d checksum error ucSum:0x%02x Buf:0x%02x Sum:%d.\n", 
 							n, ucSum, rgbszBuf[x], Sum);
+					printk("vender Mac read:%02x%02x%02x%02x%02x%02x \n",
+																	rgbszBuf[x-6],
+																	rgbszBuf[x-5],
+																	rgbszBuf[x-4],
+																	rgbszBuf[x-3],
+																	rgbszBuf[x-2],
+																	rgbszBuf[x-1]);
 					grgbLanMac[n][0] = '\0';
+					
 				} else {
 					snprintf(grgbLanMac[n], sizeof(grgbLanMac[n]),
 							"%02x%02x%02x%02x%02x%02x",
