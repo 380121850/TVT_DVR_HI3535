@@ -2133,7 +2133,7 @@ static irqreturn_t stmmac_interrupt(int irq, void *arg)
 	stm_proc.interrupts++;
 	/*  GMAC 0 */
 	if (int_status & TNK_INTR_GROUP_GMAC0) {
-		stm_proc.gmac[0].interrupts++;
+		stm_proc.gmac[TNK_GMAC0_ID].interrupts++;
 		dev = stmmac_device_list[TNK_GMAC0_ID];
 		if (!dev)
 			pr_err("GMAC0 dev not yet initialised\n");
@@ -2157,14 +2157,14 @@ static irqreturn_t stmmac_interrupt(int irq, void *arg)
 #ifdef CONFIG_STMMAC_DUAL_MAC
 	/*  GMAC 1 */
 	if (int_status & TNK_INTR_GROUP_GMAC1) {
-		stm_proc.gmac[1].interrupts++;
-		dev = stmmac_device_list[1];
+		stm_proc.gmac[TNK_GMAC1_ID].interrupts++;
+		dev = stmmac_device_list[TNK_GMAC1_ID];
 		if (!dev)
 			pr_err("GMAC1 dev not yet initialised\n");
 		else {
 			priv = netdev_priv(dev);
 			if (!priv)
-				pr_err("GMAC0 priv not yet initialised\n");
+				pr_err("GMAC1 priv not yet initialised\n");
 			else {
 				if (int_status & TNK_INTR_STAT_GMAC1_DATA)
 					stmmac_dma_interrupt(priv);

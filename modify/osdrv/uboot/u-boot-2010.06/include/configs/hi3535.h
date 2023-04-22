@@ -216,12 +216,13 @@
 #define CONFIG_TNK
 
 #ifdef CONFIG_NET_STMMAC
+#define STMMAC_SINGLE_MAC  // 当前只有一个网口
 #define STMMAC_GMACADDR		(0x12020000)
 #define STMMAC_DMAADDR		(0x12021000)
 #define STMMAC_IOSIZE		(0x10000)
 #define STMMAC_FRQDIV		(0)
-#define STMMAC_PHYADDR0		(1)
-#define STMMAC_PHYADDR1		(0x11)
+#define STMMAC_PHYADDR0		(0x11)
+//#define STMMAC_PHYADDR1		(0x11) // 当前只有一个网口
 #define STMMAC_PHYNAME		"0:17"
 #define STMMAC_RGMII
 #define CONFIG_PHY_GIGE

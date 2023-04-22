@@ -15,9 +15,11 @@ export PCI_MODE=none
 
 export DIR_MODIFY=$(OSDRV_DIR)/../../modify/
 export OSDRV_DIR_MODIFY=$(DIR_MODIFY)/osdrv/
-export NVR216_BIN_DIR=$(DIR_MODIFY)/NVR216/
-
+export DSM_VER=15284
 export KERNEL_TYPE=dsm
+export NVR216_BIN_DIR=$(DIR_MODIFY)/NVR216/$(DSM_VER)/
+
+export HI3535_SDK_MPP=$(OSDRV_DIR)/../mpp/ko/
 
 ifeq ($(KERNEL_TYPE),hisi)
 export KERNEL_VER=linux-3.4.y
@@ -202,6 +204,27 @@ rd.bin:
 	pushd $(DSMTarget_DIR);cp -rf $(KO_TARGET_DIR)/lib/modules/3.4.35_hi3535/kernel/drivers/usb/host/* $(DSMTarget_DIR)/rootfs/usr/lib/modules/;popd
 	pushd $(DSMTarget_DIR);cd rootfs;find . |cpio -ov -H newc |lzma >../ramdisk.lzma;popd
 	pushd $(DSMTarget_DIR);mkimage -n "synology_hi3535_nvr216 15284" -A arm -O linux -T ramdisk -C none -a 0x44000000 -e 0x44000000 -d ramdisk.lzma rd.bin;popd
+
+rd_clean: 
+	@echo "---------task [3] build rd.bin"
+	pushd $(DSMTarget_DIR);rm -rf ramdisk.lzma  rootfs  ramdisk;popd
+
+##########################################################################################
+#task [4]	build hda1.tar.gz for syno rootfs 
+##########################################################################################
+hda1.tar: 
+	@echo "---------task [4] build hda1.tar"
+	pushd $(DSMTarget_DIR);rm -rf hda1_modify/  hda1.tar.gz;popd
+	pushd $(DSMTarget_DIR);mkdir -p hda1_modify;sudo tar -xJf $(NVR216_BIN_DIR)/hda1.tgz  -C hda1_modify/;popd
+	pushd $(DSMTarget_DIR);patch -p0 < $(NVR216_BIN_DIR)/hda1.patch;popd
+	pushd $(DSMTarget_DIR);find lib/modules/ -name "*.ko" | xargs -i cp {} hda1_modify/usr/lib/modules/;popd
+	#pushd $(DSMTarget_DIR);find $(HI3535_SDK_MPP) -name "*.ko" | xargs -i cp {} hda1_modify/usr/lib/modules/;popd
+	pushd $(DSMTarget_DIR)/hda1_modify/;sudo tar zcf ../hda1.tar.gz * ;popd
+
+hda1_clean: 
+	@echo "---------task [3] build rd.bin"
+	pushd $(DSMTarget_DIR);rm -rf hda1_modify/  hda1.tar.gz;popd
+	
 	
 ##########################################################################################
 #task [3]	prepare drv
