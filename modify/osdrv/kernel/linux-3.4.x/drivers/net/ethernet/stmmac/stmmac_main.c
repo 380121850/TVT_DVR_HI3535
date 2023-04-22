@@ -3148,6 +3148,7 @@ static struct plat_stmmacphy_data stmmac_phy_private_data[] = {
 		.bus_id = 1,
 		.phy_addr = CONFIG_STMMAC_PHY0_ID,
 		.phy_mask = 0,
+		.phy_reset = ip1000_phy_reset,
 		.interface = CONFIG_STMMAC_PHY0_INTERFACE_MODE,
 	},
 #ifdef CONFIG_STMMAC_DUAL_MAC
@@ -3156,6 +3157,7 @@ static struct plat_stmmacphy_data stmmac_phy_private_data[] = {
 		.bus_id = 1,
 		.phy_addr = CONFIG_STMMAC_PHY1_ID,
 		.phy_mask = 0,
+		.phy_reset = ip1000_phy_reset,
 		.interface = CONFIG_STMMAC_PHY1_INTERFACE_MODE,
 	}
 #endif
