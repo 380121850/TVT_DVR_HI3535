@@ -16,20 +16,26 @@ export PCI_MODE=none
 
 export DIR_MODIFY=$(OSDRV_DIR)/../../modify/
 export OSDRV_DIR_MODIFY=$(DIR_MODIFY)/osdrv/
-
-export KERNEL_TYPE=debian
 export HI3535_SDK_MPP=$(OSDRV_DIR)/../mpp/ko/
 
+export KERNEL_TYPE=debian
+
 ifeq ($(KERNEL_TYPE),debian)
-export KERNEL_VER=linux-3.4.y
-export KERNEL_TAR_FILE=$(KERNEL_VER).tgz
-export KERNEL_TAR_CMD=tar xzf
+export KERNEL_VER=linux-3.4.x
+export KERNEL_TAR_FILE=hi3535-linux-3.4.x.txz
+export KERNEL_TAR_CMD=tar xJf
 endif
 
 ifeq ($(KERNEL_TYPE),dsm)
 export KERNEL_VER=linux-3.4.x
 export KERNEL_TAR_FILE=hi3535-linux-3.4.x.txz
 export KERNEL_TAR_CMD=tar xJf
+endif
+
+ifeq ($(KERNEL_TYPE),hisi)
+export KERNEL_VER=linux-3.4.y
+export KERNEL_TAR_FILE=$(KERNEL_VER).tgz
+export KERNEL_TAR_CMD=tar xzf
 endif
 
 export KERNEL_DIR=$(OSDRV_DIR)/kernel/$(KERNEL_VER)/
@@ -163,7 +169,7 @@ hiboot_clean:
 ##########################################################################################
 #task [2]	build kernel
 ##########################################################################################
-hikernel:
+hikernel:prepare
 	@echo "---------task [2] build kernel"
 	#rm -rf $(KERNEL_DIR)
 	#$(KERNEL_TAR_CMD) $(OSDRV_DIR)/kernel/$(KERNEL_TAR_FILE)  -C $(OSDRV_DIR)/kernel/
