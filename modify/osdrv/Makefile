@@ -4,20 +4,23 @@
 ##########################################################################################
 export OSDRV_DIR=$(shell pwd)
 export OSDRV_CROSS=arm-hisiv200-linux
+export ARCH=arm
 export OSDRV_SIZE ?= full
 export CHIP=hi3535
 export REG_INFO_BIN
 export UBOOT_IMAGE_BIN
-export ARCH=arm
+
 export CROSS_COMPILE=$(OSDRV_CROSS)-
 export RLS_VERSION=release 
 export PCI_MODE=none
 
-export OSDRV_DIR_MODIFY=$(OSDRV_DIR)/../../modify/osdrv/
+export DIR_MODIFY=$(OSDRV_DIR)/../../modify/
+export OSDRV_DIR_MODIFY=$(DIR_MODIFY)/osdrv/
 
-export KERNEL_TYPE=dsm
+export KERNEL_TYPE=debian
+export HI3535_SDK_MPP=$(OSDRV_DIR)/../mpp/ko/
 
-ifeq ($(KERNEL_TYPE),hisi)
+ifeq ($(KERNEL_TYPE),debian)
 export KERNEL_VER=linux-3.4.y
 export KERNEL_TAR_FILE=$(KERNEL_VER).tgz
 export KERNEL_TAR_CMD=tar xzf
@@ -31,9 +34,10 @@ endif
 
 export KERNEL_DIR=$(OSDRV_DIR)/kernel/$(KERNEL_VER)/
 export KERNEL_MODIFY_DIR=$(OSDRV_DIR_MODIFY)/kernel/$(KERNEL_VER)/
-export KernelTargetOutPath=$(OSDRV_DIR)/pub/dsm/
-export KO_TARGET_DIR=$(OSDRV_DIR)/pub/dsm/
-
+export DEBIAN_Target=$(OSDRV_DIR)/pub/debian/
+export KernelTargetOutPath=$(DEBIAN_Target)/
+export KO_TARGET_DIR=$(DEBIAN_Target)/
+export UBOOT_TargetOutPath=$(DEBIAN_Target)/
 
 # if CHIP is support, we set SUPPORT_CHIP = "yes"
 SUPPORT_CHIP := "no"
@@ -124,14 +128,17 @@ ifeq ($(RLS_VERSION),debug)
 	$(error parameter error! we just support debug in debug full version!)
 endif
 endif
-	mkdir $(OSDRV_DIR)/pub/$(PUB_IMAGE) -p
-	mkdir $(OSDRV_DIR)/pub/bin/$(PUB_BOARD) -p
-	mkdir $(OSDRV_DIR)/pub/bin/pc -p
+	mkdir -p $(OSDRV_DIR)/pub/$(PUB_IMAGE)
+	mkdir -p $(OSDRV_DIR)/pub/bin/$(PUB_BOARD)
+	mkdir -p $(OSDRV_DIR)/pub/bin/pc
+	mkdir -p $(KernelTargetOutPath)
+	mkdir -p $(UBOOT_TargetOutPath)
+	mkdir -p $(KO_TARGET_DIR)
 
 ##########################################################################################
 #task [1]	build uboot
 ##########################################################################################
-hiboot:
+hiboot:prepare
 	@echo "---------task [1]	build boot"
 	#rm $(OSDRV_DIR)/uboot/u-boot-2010.06 -rf
 	#tar xzf $(OSDRV_DIR)/uboot/u-boot-2010.06.tgz -C $(OSDRV_DIR)/uboot
@@ -139,18 +146,19 @@ hiboot:
 	cp -rf $(OSDRV_DIR_MODIFY)/uboot/u-boot-2010.06/* $(OSDRV_DIR)/uboot/u-boot-2010.06/
 	make -C $(OSDRV_DIR)/uboot/u-boot-2010.06 ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- $(CHIP_BOOT_CFG)
 	pushd $(OSDRV_DIR)/uboot/u-boot-2010.06;make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- -j 20 >/dev/null;popd
-	cp $(OSDRV_DIR)/uboot/u-boot-2010.06/u-boot.bin $(OSDRV_DIR)/pub/$(PUB_IMAGE)
+	cp $(OSDRV_DIR)/uboot/u-boot-2010.06/u-boot.bin $(UBOOT_TargetOutPath)/
 ifeq ($(CHIP), hi3535)
-	cp $(OSDRV_DIR)/tools/pc_tools/uboot_tools/mkboot.sh $(OSDRV_DIR)/pub/$(PUB_IMAGE)
-	cp $(OSDRV_DIR)/tools/pc_tools/uboot_tools/$(REG_INFO_BIN) $(OSDRV_DIR)/pub/$(PUB_IMAGE)
-	chmod 777 $(OSDRV_DIR)/pub/$(PUB_IMAGE)/mkboot.sh
-	pushd $(OSDRV_DIR)/pub/$(PUB_IMAGE); ./mkboot.sh $(REG_INFO_BIN) $(UBOOT_IMAGE_BIN); popd;
-	rm $(OSDRV_DIR)/pub/$(PUB_IMAGE)/u-boot.bin -f
-	rm $(OSDRV_DIR)/pub/$(PUB_IMAGE)/mkboot.sh -f
-	rm $(OSDRV_DIR)/pub/$(PUB_IMAGE)/$(REG_INFO_BIN) -f
+	cp $(OSDRV_DIR)/tools/pc_tools/uboot_tools/mkboot.sh $(UBOOT_TargetOutPath)/
+	cp $(OSDRV_DIR)/tools/pc_tools/uboot_tools/$(REG_INFO_BIN) $(UBOOT_TargetOutPath)/
+	chmod 777 $(UBOOT_TargetOutPath)/mkboot.sh
+	pushd $(UBOOT_TargetOutPath)/; ./mkboot.sh $(REG_INFO_BIN) $(UBOOT_IMAGE_BIN); popd;
+	rm $(UBOOT_TargetOutPath)/u-boot.bin -f
+	rm $(UBOOT_TargetOutPath)/mkboot.sh -f
+	rm $(UBOOT_TargetOutPath)/$(REG_INFO_BIN) -f
 endif
 hiboot_clean:
-	rm $(OSDRV_DIR)/uboot/u-boot-2010.06 -rf
+	#rm $(OSDRV_DIR)/uboot/u-boot-2010.06 -rf
+	pushd $(OSDRV_DIR)/uboot/u-boot-2010.06;make ARCH=arm CROSS_COMPILE=$(OSDRV_CROSS)- clean >/dev/null;popd
 
 ##########################################################################################
 #task [2]	build kernel
@@ -314,10 +322,9 @@ hirootfs_build:hibusybox hiboardtools hipctools
 	find $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/ -name '*svn' | xargs rm -rf
 	pushd $(OSDRV_DIR)/pub;tar czf $(PUB_ROOTFS).tgz $(PUB_ROOTFS);popd
 	@echo "---------finish osdrv work"
-
 hirootfs_clean:
 	rm $(OSDRV_DIR)/pub/$(PUB_ROOTFS)/ -rf
-
+	
 ##########################################################################################
 #task [9]	clean pub
 ##########################################################################################

@@ -4,11 +4,12 @@
 ##########################################################################################
 export OSDRV_DIR=$(shell pwd)
 export OSDRV_CROSS=arm-hisiv200-linux
+export ARCH=arm
 export OSDRV_SIZE ?= full
 export CHIP=hi3535
 export REG_INFO_BIN
 export UBOOT_IMAGE_BIN
-export ARCH=arm
+
 export CROSS_COMPILE=$(OSDRV_CROSS)-
 export RLS_VERSION=release 
 export PCI_MODE=none
